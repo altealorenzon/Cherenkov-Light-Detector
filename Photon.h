@@ -4,7 +4,7 @@
 
 class Photon: public Particle {
 public:
-    Photon( Vector* x_0, double e, double theta_0, double phi_0 );
+    Photon( Vector* x_0, double e, double theta_0, double phi_0 ){};
 private:
 };
 

@@ -1,7 +1,7 @@
 #include <cmath>
 #include "Setup.h"
 
-Setup::Setup( std::string& type ): type_of_detector( type ) {
+Setup::Setup( std::string type ): type_of_detector( type ) {
     
     d = 0; //TODO
     if( type_of_detector == "cylinder" ) {
@@ -83,7 +83,7 @@ bool Setup::checkPosition( Vector* x ) {
         return ( sqrt( x->getX()*x->getX() + x->getY()*x->getY() ) == r && x->getZ() < h );
     }
     else if( type_of_detector == "parallelepiped" ) {
-        
+        return ( abs( x->getX() ) < r/2 && abs( x->getY() ) < r/2 && x->getZ() < h );
     }
     
 }

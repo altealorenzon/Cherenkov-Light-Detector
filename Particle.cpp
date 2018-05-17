@@ -1,26 +1,25 @@
 #include "Particle.h"
 #include <cmath>
 
+std::vector<particles_data*> Particle::my_particles = std::vector<particles_data*>();
+
 Particle::Particle( int id, Vector* x_0, double e, double theta_0, double phi_0 ) : p_id( id ), x( x_0 ), energy( e ), theta( theta_0 ), phi( phi_0 ) {
     position->push_back( x_0 );
-    // muon
-    if( id == 13 ) {
-        mass   = 105; // MeV/c^2
-        charge =  -1;
+    
+    particles_data data = *Particle::my_particles[std::abs(p_id)];
+//     if(data) {
+        mass = data.m;
+        charge = (p_id > 0) ? data.q : -data.q;
+        step_length = data.step;
         p      = sqrt( energy*energy - mass*mass );
-        step   =    ;
-    } 
-    // photon
-    else if( id == 22 ) {
-        mass   = 0;
-        charge = 0;
-        p      = sqrt( energy*energy - mass*mass );
-        step   = 0;
-    }
+        v      = (mass == 0) ? 1/2 : p/energy; //TODO set massless particle speed to 1/n
+//     } else {
+//         std::cerr << "ERROR: No particle with ID = " << p_id << std::endl;
+//     }
 }
 
 int Particle::getID() {
-    return id;
+    return p_id;
 }
     
 double Particle::getMass() {
@@ -40,14 +39,19 @@ double Particle::getP() {
 }
     
 void Particle::updatePosition() {
-    x->shift( step*sin(theta)*cos(phi), step*sin(theta)*sin(phi), step*cos(theta) );
+    x->shift( step_length*sin(theta)*cos(phi), step_length*sin(theta)*sin(phi), step_length*cos(theta) );
     position->push_back( x );
 }
 
 Vector* Particle::getLastPosition() {
-    return x;
+    return position->back();
 }
 
-vector<Vector*>* Particle::getPositionList() {
+std::vector<Vector*>* Particle::getPositionList() {
     return position;
 }
+
+void Particle::setParticlesData() {
+        Particle::my_particles[13] = new particles_data( 105, -1, 0.5 );
+        Particle::my_particles[22] = new particles_data( 0, 0, 0 ); //TODO Set correct values for photons
+};
