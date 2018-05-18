@@ -11,9 +11,11 @@ int main( int argc, char* argv[] ) {
     Particle::setParticlesData();
     int nEvents = atoi( argv[1] );
     
+    std::cout << "Number of events: " << nEvents << std::endl;
+    
     Setup* setup = new Setup( argv[2] );
     
-    std::vector<Muon*>* muList;
+    std::vector<Muon*>* muList = new std::vector<Muon*>();
     
     for( int i=0; i<nEvents; ++i ) {
         

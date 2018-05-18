@@ -1,7 +1,10 @@
+#include <iostream>
 #include <cmath>
 #include "Setup.h"
 
 Setup::Setup( std::string type ): type_of_detector( type ) {
+    
+    std::cout << "Type of detector: " << type_of_detector << std::endl;
     
     d = 0; //TODO
     if( type_of_detector == "cylinder" ) {
@@ -12,8 +15,11 @@ Setup::Setup( std::string type ): type_of_detector( type ) {
         r = 0; //TODO cm lato del quadrato di base
         h = 0; //TODO cm altezza
     }
+    
+    std::cout << "Dimensions: \n   r = " << r << "\n   h = " << h << std::endl;
+    
     std::random_device rdv;
-    gen.seed(rdv());
+    gen.seed( rdv() );
 }
 
 Vector* Setup::generateInitialPoint() {
@@ -48,7 +54,11 @@ Vector* Setup::generateInitialPoint() {
             y_0 = -r*dist( gen );
         }
     }
-
+    
+    std::cout << std::endl;
+    std::cout << "********************** SETUP INITIAL CONDITIONS **********************" << std::endl;
+    std::cout << "Initial point for a " << type_of_detector << ": (" << x_0 << ", " << y_0 << ", 0)" << std::endl;
+    
     initialPoint = new Vector( x_0, y_0, 0 );
     return initialPoint;
     
@@ -57,7 +67,7 @@ Vector* Setup::generateInitialPoint() {
 double* Setup::generateInitialAngle() {
     
     std::uniform_real_distribution<double> dist(0, 1);
-    angle[0] = 2*M_PI*dist(gen); //angle on x,y plane
+    angle[1] = 2*M_PI*dist(gen); //angle on x,y plane
     
     double max_angle;           //max azimuthal angle
     if( type_of_detector == "cylinder" ) {
@@ -72,18 +82,22 @@ double* Setup::generateInitialAngle() {
         }
     }
     
-    angle[1] = max_angle*dist( gen );
+    angle[0] = max_angle*dist( gen );
+    
+    std::cout << "Inizial angle on x,y plane  : " << angle[1] << std::endl;
+    std::cout << "Initial azimuthal angle     : " << angle[0] << std::endl;
     
     return angle;
 }
     
 bool Setup::checkPosition( Vector* x ) {
     
+    double xpos = x->getX(), ypos = x->getY(), zpos = x->getZ();
     if( type_of_detector == "cylinder" ) {
-        return ( sqrt( x->getX()*x->getX() + x->getY()*x->getY() ) == r && x->getZ() < h );
+        return ( sqrt( xpos*xpos + ypos*ypos ) <= r && zpos <= h );
     }
     else if( type_of_detector == "parallelepiped" ) {
-        return ( abs( x->getX() ) < r/2 && abs( x->getY() ) < r/2 && x->getZ() < h );
+        return ( abs( xpos ) <= r/2 && abs( ypos ) <= r/2 && zpos <= h );
     }
     
 }
