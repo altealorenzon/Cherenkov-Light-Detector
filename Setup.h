@@ -12,10 +12,11 @@ public:
     Vector* generateInitialPoint();
     double* generateInitialAngle();
     bool    checkPosition( Vector* x );
+    double  getRefractionIndex(); //TODO make it static
     
 private:
     std::string type_of_detector;
-    double n;              // indice di rifrazione
+    double n;              //indice di rifrazione
     double r;              //cm lato di base o raggio
     double h;              //cm altezza
     double d;              //cm distanza degli scintillatori

@@ -6,6 +6,7 @@ Setup::Setup( std::string type ): type_of_detector( type ) {
     
     std::cout << "Type of detector: " << type_of_detector << std::endl;
     
+    n = 1.1; //TODO
     d = 0; //TODO
     if( type_of_detector == "cylinder" ) {
         r = 2.5; //cm raggio
@@ -100,4 +101,8 @@ bool Setup::checkPosition( Vector* x ) {
         return ( abs( xpos ) <= r/2 && abs( ypos ) <= r/2 && zpos <= h );
     }
     
+}
+
+double Setup::getRefractionIndex() {
+    return n;
 }

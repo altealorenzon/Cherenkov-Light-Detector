@@ -23,6 +23,6 @@ void Vector::shift( double x_1, double y_1, double z_1 ) {
     z += z_1;
 }
 
-void Vector::rotate( double theta, double phi ) {
-    
-}
+// void Vector::rotate( double theta, double phi ) {
+//     
+// }

@@ -21,7 +21,9 @@ public:
     double           getCharge();
     double           getEnergy();
     double           getP();
+    double           getSpeed();
     void             updatePosition();
+    void             rotatePosition( double theta_1, double phi_1 );
     Vector*          getLastPosition();
     std::vector<Vector*>* getPositionList();
 

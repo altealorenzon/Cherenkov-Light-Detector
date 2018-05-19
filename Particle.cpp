@@ -16,7 +16,7 @@ p_id( id ), x( x_0 ), energy( e ), theta( theta_0 ), phi( phi_0 ) {
     charge      = (p_id > 0) ? data.q : -data.q;
     step_length = data.step;
     p           = sqrt( energy*energy - mass*mass );
-    v           = (mass == 0) ? 1/2 : p/energy; //TODO set massless particle speed to 1/n
+    v           = (mass == 0) ? 1.0/2 : p/energy; //TODO set massless particle speed to 1/n 
     
     std::cout << std::endl;
     std::cout << "*************************** NEW PARTICLE *****************************" << std::endl;
@@ -52,13 +52,21 @@ double Particle::getEnergy() {
 double Particle::getP() {
     return p;
 }
+
+double Particle::getSpeed() {
+    return v;
+}
     
 void Particle::updatePosition() {
     x->shift( step_length*sin(theta)*cos(phi), step_length*sin(theta)*sin(phi), step_length*cos(theta) );
-    
-    position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
-    std::cout << "New position: (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ") " << std::endl;
+    if ( p_id == 13 ) {
+        position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
+        std::cout << "New position: (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ") " << std::endl;
+    }
+}
 
+void Particle::rotatePosition( double theta_1, double phi_1 ) {
+    //TODO
 }
 
 Vector* Particle::getLastPosition() {
