@@ -16,4 +16,4 @@ all:
 	${CXX} ${CXXFLAGS} -o Cherenkov ${CPP_FILES}  ${LIBS} ${GLIBS}
 
 clean:
-	rm *.o Cherenkov
+	rm Cherenkov #*.root

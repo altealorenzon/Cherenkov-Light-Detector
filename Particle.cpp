@@ -8,7 +8,7 @@ Particle::Particle( int id, Vector* x_0, double e, double theta_0, double phi_0 
 p_id( id ), x( x_0 ), energy( e ), theta( theta_0 ), phi( phi_0 ) {
     
     position = new std::vector<Vector*>();
-    position->push_back( x );
+    position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
     
     particles_data data = Particle::my_particles[std::abs(p_id)];
     
@@ -55,9 +55,10 @@ double Particle::getP() {
     
 void Particle::updatePosition() {
     x->shift( step_length*sin(theta)*cos(phi), step_length*sin(theta)*sin(phi), step_length*cos(theta) );
-    position->push_back( x );
     
+    position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
     std::cout << "New position: (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ") " << std::endl;
+
 }
 
 Vector* Particle::getLastPosition() {
