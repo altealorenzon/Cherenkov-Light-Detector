@@ -59,10 +59,10 @@ double Particle::getSpeed() {
     
 void Particle::updatePosition() {
     x->shift( step_length*sin(theta)*cos(phi), step_length*sin(theta)*sin(phi), step_length*cos(theta) );
-    if ( p_id == 13 ) {
+//     if ( p_id == 13 ) {
         position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
         std::cout << "New position: (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ") " << std::endl;
-    }
+//     }
 }
 
 void Particle::rotatePosition( double theta_1, double phi_1 ) {
@@ -82,5 +82,5 @@ void Particle::setParticlesData() {
             Particle::my_particles[i] = particles_data();
         }
         Particle::my_particles[13] = particles_data( 105, -1, 0.05 );
-        Particle::my_particles[22] = particles_data( 0, 0, 0 ); //TODO Set correct values for photons
+        Particle::my_particles[22] = particles_data( 0, 0, 0.05 ); //TODO Set correct values for photons
 }
