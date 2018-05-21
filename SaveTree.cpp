@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include "Muon.h"
+#include "Vector.h"
 #include "TFile.h"
 #include "TTree.h"
 
@@ -19,45 +20,53 @@ static void SaveTree( std::vector<Muon*>* muList ) {
     double z[200];      tree->Branch( "z",         z,          "z[200]/D"    );
     
     for( int i=0; i<nEvents; i++ ) {
-        
-        for( int j=0; j<200; j++ ) {
-            x[j] = y[j] = z[j] = {0};
-        }
-        
         evNumber = i+1;
-        Muon* mu = muList->at( i );
-        int nPos = mu->getPositionList()->size();
         
-        //TODO add a loop on the number of particles to include photons
-        id = 13;
-        energy = muList->at( i )->getEnergy();
-        for( int j=0; j<nPos; j++ ) {
-            x[j] = mu->getPositionList()->at( j )->getX();
-            y[j] = mu->getPositionList()->at( j )->getY();
-            z[j] = mu->getPositionList()->at( j )->getZ();
-            std::cout << z[j] << std::endl;
-        }
-        tree->Fill();
-        
+        //set all coordinates to (0,0,0)
         for( int j=0; j<200; j++ ) {
             x[j] = y[j] = z[j] = 0;
         }
         
-        id = 22;
-        for(std::vector<Photon*>::iterator it = mu->getPhotonList()->begin(); it != mu->getPhotonList()->end(); it++) {
-            Photon* ph = *it;
-            energy = ph->getEnergy();
-            nPos = ph->getPositionList()->size();
-            for( int j=0; j<nPos; j++ ) {
-                x[j] = ph->getPositionList()->at( j )->getX();
-                y[j] = ph->getPositionList()->at( j )->getY();
-                z[j] = ph->getPositionList()->at( j )->getZ();
-            }   
-            tree->Fill();
+        Muon* mu = muList->at( i );
+        
+        id = 13;
+        energy = muList->at( i )->getEnergy();
+        
+        //loop on muon positions
+        int nPos = mu->getPositionList()->size();
+        for( int j=0; j<nPos; j++ ) {
+            Vector* x_mu = mu->getPositionList()->at( j );
+            x[j] = x_mu->getX();
+            y[j] = x_mu->getY();
+            z[j] = x_mu->getZ();
+        }
+        //fill tree with muon variables
+        tree->Fill();
+        
+        //set all coordinates to (0,0,0)
+        for( int j=0; j<200; j++ ) {
+            x[j] = y[j] = z[j] = 0;
         }
         
+        //Loop on photons
+        id = 22;
+        for( std::vector<Photon*>::iterator it = mu->getPhotonList()->begin(); it != mu->getPhotonList()->end(); it++ ) {
+            Photon* ph = *it;
+            energy = ph->getEnergy();
+            //Loop on photons positions
+            nPos = ph->getPositionList()->size();
+            for( int j=0; j<nPos; j++ ) {
+                Vector* x_ph = ph->getPositionList()->at( j );
+                x[j] = x_ph->getX();
+                y[j] = x_ph->getY();
+                z[j] = x_ph->getZ();
+            }  
+            //fill tree with photon variables
+            tree->Fill();
+        }
     }
     
     tree->Write();
     file->Close();
+    
 };

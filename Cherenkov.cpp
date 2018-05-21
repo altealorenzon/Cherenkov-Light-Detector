@@ -46,14 +46,6 @@ int main( int argc, char* argv[] ) {
         muList->push_back( mu );
     }
     
-    for( int i=0; i<nEvents; i++) {
-        
-        int nPos = muList->at( i )->getPositionList()->size();
-        for( int j=0; j<nPos; j++ ) {
-            std::cout << muList->at( i )->getPositionList()->at( j )->getZ() << std::endl;
-        }
-    }
-    
     SaveTree( muList );
     
     return 0;
