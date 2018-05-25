@@ -33,14 +33,12 @@ int main( int argc, char* argv[] ) {
         
         for( int j=0; j<phList->size(); j++ ) {
             
-            phList->at( j )->updatePosition(); //new position in the muon rf
-//             phList->at( j )->rotatePosition( angle[0], angle[1] ); //new position in the global rf
+            phList->at( j )->rotatePosition( angle[0], angle[1] );
             while( setup->checkPosition( phList->at( j )->getLastPosition() ) == true ) {
-//                 here we can add possible interactions
-                phList->at( j )->updatePosition();  //new position in the muon rf
-//                 phList->at( j )->rotatePosition( angle[0], angle[1] );  //new position in the global rf
-            }
+//                 here we can add possible interactions riflessione! diffusione
 
+                phList->at( j )->rotatePosition( angle[0], angle[1] ); 
+            }
         }
         
         muList->push_back( mu );

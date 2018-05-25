@@ -18,7 +18,7 @@ void Muon::Cherenkov( double n ) {
         std::cout << "I can do Cherenkov! "<< v << ">" << 1/n << std::endl;
         
         double doCherenkov = dist( gen );
-        double lambda = 300000000; //fm
+        double lambda = 300000000; //fm //TODO 
         double theta_0 = acos( 1/v/n );
 
         if( doCherenkov >= 0.5 && doCherenkov < 1 ) {
