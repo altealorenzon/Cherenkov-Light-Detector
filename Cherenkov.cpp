@@ -6,7 +6,7 @@
 #include "Muon.h"
 //#include "TFile.h"
 //include "TTree.h"
-//#include "SaveTree.cpp" //e' la funzione che permette di salvare tutto in root e include anche "TFile.h" e "TTree.h"
+#include "SaveTree.cpp" //e' la funzione che permette di salvare tutto in root e include anche "TFile.h" e "TTree.h"
 
 int main( int argc, char* argv[] ) {
     
@@ -48,7 +48,7 @@ int main( int argc, char* argv[] ) {
         muList->push_back( mu );
     }
     
-    //SaveTree( muList ); //va messo per salvare tutto in root
+    SaveTree( muList ); //va messo per salvare tutto in root
     
     return 0;
 }

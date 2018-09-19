@@ -87,6 +87,6 @@ void Particle::setParticlesData() {
         Particle::my_particles[i] = particles_data();
     }
     Particle::my_particles[13] = particles_data( 105, -1, 0.05 );
-    Particle::my_particles[22] = particles_data( 0, 0, 0.05 ); //TODO Set correct values for photons
+    Particle::my_particles[22] = particles_data( 0, 0, 0.1 ); //TODO Set correct values for photons
 }
 
