@@ -95,7 +95,7 @@ bool Setup::checkPosition( Vector* x ) {
     
     double xpos = x->getX(), ypos = x->getY(), zpos = x->getZ();
     if( type_of_detector == "cylinder" ) {
-        return ( sqrt( xpos*xpos + ypos*ypos ) <= r && zpos <= h );
+        return ( sqrt( xpos*xpos + ypos*ypos ) < r && zpos < h && zpos >= 0.0); //to verify whether to use <= or < (>= or >);
     }
     else if( type_of_detector == "parallelepiped" ) {
         return ( abs( xpos ) <= r/2 && abs( ypos ) <= r/2 && zpos <= h );
@@ -105,4 +105,9 @@ bool Setup::checkPosition( Vector* x ) {
 
 double Setup::getRefractionIndex() {
     return n;
+}
+
+double Setup::getRadius() {
+    return r;
+    
 }

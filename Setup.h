@@ -12,6 +12,7 @@ public:
     Vector* generateInitialPoint();
     double* generateInitialAngle();
     bool    checkPosition( Vector* x );
+    double  getRadius();
     double  getRefractionIndex(); //TODO make it static
     
 private:
