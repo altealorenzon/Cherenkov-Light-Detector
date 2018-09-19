@@ -63,6 +63,7 @@ double Particle::getSpeed() {
 
 void Particle::updatePosition() {
     x->shift( step_length*sin(theta)*cos(phi), step_length*sin(theta)*sin(phi), step_length*cos(theta) );
+<<<<<<< HEAD
     //     if ( p_id == 13 ) {
     position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
     std::cout << "New muon position: (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ") " << std::endl;
@@ -72,6 +73,32 @@ void Particle::updatePosition() {
 
 Vector* Particle::getX() {
     return x;
+=======
+    position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
+    std::cout << "New position: (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ") " << std::endl;
+}
+
+void Particle::rotatePosition( double theta_1, double phi_1 ) {
+    double temp_x;
+    double temp_y;
+    double temp_z;
+    
+    temp_x = step_length*sin(theta)*cos(phi);
+    temp_y = step_length*sin(theta)*sin(phi);
+    temp_z = step_length*cos(theta);
+    
+    double proj_x;
+    double proj_y;
+    double proj_z;
+    
+    proj_x = temp_x*cos(theta_1)*cos(phi_1) - temp_y*cos(theta_1)*sin(phi_1) + temp_z*sin(theta_1)*cos(phi_1);
+    proj_y = temp_x*cos(theta_1)*sin(phi_1) + temp_y*cos(theta_1)*cos(phi_1) + temp_z*sin(theta_1)*sin(phi_1);
+    proj_z = -temp_x*sin(theta_1) - temp_y*sin(theta_1) + temp_z*cos(theta_1);
+    
+    x->shift(proj_x, proj_y, proj_z);
+    position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
+    std::cout << "New photon position: (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
+>>>>>>> 6641db7221ee782fa46adecc3ee30e88669206dd
 }
 
 Vector* Particle::getLastPosition() {
@@ -83,10 +110,18 @@ std::vector<Vector*>* Particle::getPositionList() {
 }
 
 void Particle::setParticlesData() {
+<<<<<<< HEAD
     for(int i = 0; i < 30; i++) {
         Particle::my_particles[i] = particles_data();
     }
     Particle::my_particles[13] = particles_data( 105, -1, 0.05 );
     Particle::my_particles[22] = particles_data( 0, 0, 0.05 ); //TODO Set correct values for photons
+=======
+        for(int i = 0; i < 30; i++) {
+            Particle::my_particles[i] = particles_data();
+        }
+        Particle::my_particles[13] = particles_data( 105, -1, 0.05 );
+        Particle::my_particles[22] = particles_data( 0, 0, 0.05 ); //TODO Set correct values for photons
+>>>>>>> 6641db7221ee782fa46adecc3ee30e88669206dd
 }
 
