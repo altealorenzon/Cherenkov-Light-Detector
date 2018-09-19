@@ -4,13 +4,9 @@
 #include "Setup.h"
 #include "Vector.h"
 #include "Muon.h"
-<<<<<<< HEAD
 //#include "TFile.h"
 //include "TTree.h"
 //#include "SaveTree.cpp" //e' la funzione che permette di salvare tutto in root e include anche "TFile.h" e "TTree.h"
-=======
-#include "SaveTree.cpp"
->>>>>>> 6641db7221ee782fa46adecc3ee30e88669206dd
 
 int main( int argc, char* argv[] ) {
     
@@ -35,10 +31,7 @@ int main( int argc, char* argv[] ) {
             mu->Cherenkov( setup->getRefractionIndex() ); //TODO n becomes global
             mu->updatePosition();
         }
-<<<<<<< HEAD
         
-=======
->>>>>>> 6641db7221ee782fa46adecc3ee30e88669206dd
         std::vector<Photon*>* phList = mu->getPhotonList();
         
         for( int j=0; j < phList->size(); j++ ) {
@@ -49,26 +42,13 @@ int main( int argc, char* argv[] ) {
                 phList->at( j )->updatePositionPh( angle[0], angle[1], setup);  //new position in the global rf
                 }
             
-<<<<<<< HEAD
-=======
-            phList->at( j )->rotatePosition( angle[0], angle[1] );
-            while( setup->checkPosition( phList->at( j )->getLastPosition() ) == true ) {
-//                 here we can add possible interactions riflessione! diffusione
-
-                phList->at( j )->rotatePosition( angle[0], angle[1] ); 
-            }
->>>>>>> 6641db7221ee782fa46adecc3ee30e88669206dd
         }
         
         
         muList->push_back( mu );
     }
     
-<<<<<<< HEAD
     //SaveTree( muList ); //va messo per salvare tutto in root
-=======
-    SaveTree( muList );
->>>>>>> 6641db7221ee782fa46adecc3ee30e88669206dd
     
     return 0;
 }

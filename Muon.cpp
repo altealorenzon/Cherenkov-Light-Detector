@@ -18,16 +18,12 @@ void Muon::Cherenkov( double n ) {
         std::cout << "I can do Cherenkov! "<< v << ">" << 1/n << std::endl;
         
         double doCherenkov = dist( gen );
-        double lambda = 300000000; //fm //TODO 
+        double lambda = 300000000; //fm
         double theta_0 = acos( 1/v/n );
 
         if( doCherenkov >= 0.5 && doCherenkov < 1 ) {
             std::cout << "New photon!" << std::endl;
-<<<<<<< HEAD
             Photon* ph = new Photon( x_0, 197.4/lambda, theta_0, 2*M_PI*dist( gen ) );
-=======
-            Photon* ph = new Photon( new Vector( *x_0 ), 197.4/lambda, theta_0, 2*M_PI*dist( gen ) );
->>>>>>> 6641db7221ee782fa46adecc3ee30e88669206dd
             photons->push_back( ph );
         } 
 
