@@ -23,6 +23,7 @@ static void SaveTree( std::vector<Muon*>* muList ) {
     double x[length];   tree->Branch( "x",             x,            "x[1000]/D"     );
     double y[length];   tree->Branch( "y",             y,            "y[1000]/D"     );
     double z[length];   tree->Branch( "z",             z,            "z[1000]/D"     );
+    int phNumber;       tree->Branch( "phNumber",     &phNumber,     "phNumber/I"    );
     
     for( int i=0; i<nEvents; i++ ) {
         evNumber = i+1;
@@ -55,11 +56,13 @@ static void SaveTree( std::vector<Muon*>* muList ) {
         
         //Loop on photons
         id = 22;
+        phNumber = 0;
         for( std::vector<Photon*>::iterator it = mu->getPhotonList()->begin(); it != mu->getPhotonList()->end(); it++ ) {
             Photon* ph = *it;
             energy = ph->getEnergy();
             theta_out = ph->gettheta_out_ph();
             phi_out   = ph->getphi_out_ph();
+            ++phNumber;
             //Loop on photons positions
             nPos = ph->getPositionList()->size();
             position_out = ph->getPosition_out();
