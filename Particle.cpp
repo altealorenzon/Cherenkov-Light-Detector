@@ -1,5 +1,5 @@
 #include "Particle.h"
-#include "Photon.h";
+#include "Photon.h"
 #include <cmath>
 #include <iostream>
 
