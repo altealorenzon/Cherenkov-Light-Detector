@@ -34,13 +34,11 @@ int main( int argc, char* argv[] ) {
         
         for( int j=0; j < phList->size(); j++ ) {
             std::cout << "PHOTON NUMBER " << j+1 << "." << std::endl;
-            //if(j<=1){
-                phList->at( j )->rotateProjections( angle[0], angle[1] ); //new projections in the global rf
-                while( setup->checkPosition( phList->at( j )->getLastPosition() ) == true ) {
-                    //here we can add possible interactions
-                    phList->at( j )->updatePositionPh( angle[0], angle[1], setup);  //new position in the global rf
-                }
-            //}
+            phList->at( j )->rotateProjections( angle[0], angle[1] ); //new projections in the global rf
+            while( setup->checkPosition( phList->at( j )->getLastPosition() ) == true ) {
+                //here we can add possible interactions
+                phList->at( j )->updatePositionPh( angle[0], angle[1], setup);  //new position in the global rf
+            }
         }
         
         
