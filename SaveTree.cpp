@@ -49,15 +49,13 @@ static void SaveTree( std::vector<Muon*>* muList ) {
         //fill tree with muon variables
         tree->Fill();
         
-        //set all coordinates to (0,0,0)
-        for( int j=0; j<length; j++ ) {
-            x[j] = y[j] = z[j] = 0;
-        }
-        
         //Loop on photons
         id = 22;
         phNumber = 0;
         for( std::vector<Photon*>::iterator it = mu->getPhotonList()->begin(); it != mu->getPhotonList()->end(); it++ ) {
+            for( int j=0; j<length; j++ ) {
+                x[j] = y[j] = z[j] = 0;
+            }
             Photon* ph = *it;
             energy = ph->getEnergy();
             theta_out = ph->gettheta_out_ph();

@@ -4,9 +4,7 @@
 #include "Setup.h"
 #include "Vector.h"
 #include "Muon.h"
-//#include "TFile.h"
-//include "TTree.h"
-#include "SaveTree.cpp" //e' la funzione che permette di salvare tutto in root e include anche "TFile.h" e "TTree.h"
+#include "SaveTree.cpp"
 
 int main( int argc, char* argv[] ) {
     
@@ -36,12 +34,13 @@ int main( int argc, char* argv[] ) {
         
         for( int j=0; j < phList->size(); j++ ) {
             std::cout << "PHOTON NUMBER " << j+1 << "." << std::endl;
-            phList->at( j )->rotateProjections( angle[0], angle[1] ); //new projections in the global rf
-            while( setup->checkPosition( phList->at( j )->getLastPosition() ) == true ) {
-//              here we can add possible interactions
-                phList->at( j )->updatePositionPh( angle[0], angle[1], setup);  //new position in the global rf
+            //if(j<=1){
+                phList->at( j )->rotateProjections( angle[0], angle[1] ); //new projections in the global rf
+                while( setup->checkPosition( phList->at( j )->getLastPosition() ) == true ) {
+                    //here we can add possible interactions
+                    phList->at( j )->updatePositionPh( angle[0], angle[1], setup);  //new position in the global rf
                 }
-            
+            //}
         }
         
         
