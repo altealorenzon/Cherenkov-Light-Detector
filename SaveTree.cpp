@@ -9,7 +9,7 @@ static void SaveTree( std::vector<Muon*>* muList ) {
     
     int nEvents = muList->size();
     
-    TFile *file = new TFile( "./Cherenkov_MC.root", "RECREATE" );
+    TFile *file = new TFile( "./output/Cherenkov_MC.root", "RECREATE" );
     TTree *tree = new TTree( "Cherenkov", "Cherenkov" );
     
     const int length = 10000;
