@@ -49,8 +49,13 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
             phi_ph_out   = proj_x/(sqrt(proj_x*proj_x+proj_y*proj_y));
             
             //Check whether the photon exited from the bottom wall or not. Important to count the number of photons reaching the detector.
-            if ( x->getZ() > 8.00 ) position_out = 1;
-            else position_out = 0;
+            if ( x->getZ() > 8.00 ) {
+                position_out = 1;
+            } else if (x->getZ() < 0.0 ) {
+                position_out = -1; 
+            } else {
+                position_out = 0;
+            }
             
             printSummary();
             
