@@ -24,7 +24,7 @@ static void SaveTree( std::vector<Muon*>* muList ) {
     double y[length];   tree->Branch( "y",             y,            "y[1000]/D"     );
     double z[length];   tree->Branch( "z",             z,            "z[1000]/D"     );
     int phNumber;       tree->Branch( "phNumber",     &phNumber,     "phNumber/I"    );
-
+    
     for( int i=0; i<nEvents; i++ ) {
         evNumber = i+1;
         

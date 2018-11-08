@@ -16,12 +16,12 @@ void Muon::Cherenkov( double n ) {
         double lambda = 300000000; //fm
         double theta_0 = acos( 1/v/n );
         std::poisson_distribution<int> poisson_dist(5.0);
-        
+        std::uniform_real_distribution<double> unif_dist(0,1);
         int nPhotonGenerated = poisson_dist( poisson_gen );
         
         for( int nPh=0; nPh<nPhotonGenerated; ++nPh) {
             std::cout << "New photon!" << std::endl;
-            Photon* ph = new Photon( new Vector(*x_0), 197.4/lambda, theta_0, 2*M_PI*dist( gen ) );
+            Photon* ph = new Photon( new Vector(*x_0), 197.4/lambda, theta_0, 2*M_PI*unif_dist( gen ) );
             photons->push_back( ph );
         } 
     } 
