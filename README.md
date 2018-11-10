@@ -9,7 +9,6 @@ make
 
 # Note
 Some parameters are still encoded.
-* in Setup.cpp: refraction index, dimensions of detetctor, distance of the trigger scintillator
+* in Setup.cpp: refraction index, dimensions of detector, distance of the trigger scintillator
 * in Particle.h: VERBOSE variable
 * in Particle.cpp: particles' data (mass, charge, step lenght)
-
