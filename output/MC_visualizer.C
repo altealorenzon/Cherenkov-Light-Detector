@@ -13,7 +13,7 @@ void MC_visualizer() {
     Int_t position_out; tree->SetBranchAddress("position_out",&position_out);
     Int_t id;           tree->SetBranchAddress("id",&id);
     
-    TH1F* phOut = new TH1F("phOut","",3,-1.5,1.5);
+    TH1F* phOut = new TH1F("phOut"," bottom = 1 / walls = 0 /top = -1",3,-1.5,1.5);
     
     Int_t nEntries = tree->GetEntries();
     
@@ -27,13 +27,5 @@ void MC_visualizer() {
     phOut->SetFillColor(kAzure-8);
     phOut->SetLineColor(kAzure-8);
     phOut->Draw();
-    
-/*    TPaveText *pt_top = new TPaveText(0.7862254,871.7349,1.430233,1447.56,"br");
-    pt_top->SetLineColor(0);
-    pt_top->SetFillColor(0);
-    pt_top->SetShadowColor(0);
-    TText *pt_top_text = pt_top->AddText("top");
-    pt_top->Draw();
-    c->Modified();*/
     
 }

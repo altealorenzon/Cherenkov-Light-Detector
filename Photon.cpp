@@ -68,7 +68,6 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
                 std::cout << "-> No reflection, the photon is out of the box!"<< std::endl;
                 printSummary();
             }
-            
         }
     }
 }
