@@ -12,22 +12,27 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
     x->shift(proj_x, proj_y, proj_z); //these are the components of the shift in the global frame
     
     if ( setup->checkPosition(x) == true ) {
-        std::cout << "Is it still inside? "<< setup->checkPosition(x) << std::endl;
+        
         position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
-        std::cout << "-> New photon position  : (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
-        std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y<< ", " << proj_z << ")" << std::endl;
-        std::cout << "-> Norm projection      : " << norm_proj << std::endl;
+        
+        if(VERBOSE) {
+            std::cout << "Is it still inside? "<< setup->checkPosition(x) << std::endl;
+            std::cout << "-> New photon position  : (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
+            std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y<< ", " << proj_z << ")" << std::endl;
+            std::cout << "-> Norm projection      : " << norm_proj << std::endl;   
+        }
         
     } else if ( setup->checkPosition(x) == false ) {
-        std::cout << "Is it still inside? "<< setup->checkPosition(x) << std::endl;
+        
         std::uniform_real_distribution<double> dist(0, 1);
         double ran = dist(gen); //generate random number in order to determine whether the photon is reflected or not.
-        std::cout << "-> The random number is: " << ran << std::endl;
+        if(VERBOSE) {
+            std::cout << "Is it still inside? "<< setup->checkPosition(x) << std::endl;
+            std::cout << "-> The random number is: " << ran << std::endl;
+        }
         
         if ( ran > 0.1) { //reflection true (TODO >=, <=)
             
-            std::cout << "-> The photons was reflected!" << std::endl;
-
             nReflections += 1;
             //Remove the previous update in order to perform the reflection
             x->shift(-proj_x, -proj_y, -proj_z);
@@ -36,12 +41,14 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
             //Update the position of the photon
             position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
             
-            std::cout << "-> New photon position  : (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
-            std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y<< ", " << proj_z << ")" << std::endl;
-        
-        }else { //reflection false
+            if(VERBOSE) {
+                std::cout << "-> The photons was reflected!" << std::endl;
+                std::cout << "-> New photon position  : (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
+                std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y<< ", " << proj_z << ")" << std::endl;
+            }
             
-            std::cout << "-> No reflection, the photon is out of the box!"<< std::endl;
+        
+        } else { //reflection false
             
             position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
             //Determine the angles of the photon at the exit (useful to plot at the angular distribution);
@@ -57,7 +64,10 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
                 position_out = 0;
             }
             
-            printSummary();
+            if(VERBOSE) {
+                std::cout << "-> No reflection, the photon is out of the box!"<< std::endl;
+                printSummary();
+            }
             
         }
     }
@@ -67,7 +77,7 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
 
 void Photon::rotateProjections( double theta_1, double phi_1 ) {
     
-    if (p_id == 22) { //controllo di sicurezza, non necessario.
+    if (p_id == 22) { //not necessary
         
         long double temp_x;
         long double temp_y;
@@ -77,20 +87,21 @@ void Photon::rotateProjections( double theta_1, double phi_1 ) {
         temp_y = step_length*sin(theta)*sin(phi);
         temp_z = step_length*cos(theta);
         
-        std::cout << "-> The original step length was: " << step_length << std::endl;
-        
         //Update the private variables: component of the shift in the global frame
         //This procedure could introduce an aproximation error.
         proj_x = temp_x*cos(theta_1)*cos(phi_1) - temp_y*cos(theta_1)*sin(phi_1) + temp_z*sin(theta_1)*cos(phi_1);
         proj_y = temp_x*cos(theta_1)*sin(phi_1) + temp_y*cos(theta_1)*cos(phi_1) + temp_z*sin(theta_1)*sin(phi_1);
         proj_z = -temp_x*sin(theta_1) - temp_y*sin(theta_1) + temp_z*cos(theta_1);
         
-        
-        //std::cout << "sum squares " << (proj_x*proj_x + proj_y*proj_y + proj_z*proj_z) << std::endl;
         norm_proj = sqrt((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z));
-        //std::cout << "difference " << abs((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z)-norm_proj*norm_proj) << std::endl;
-        //std::cout << "squared:    " << norm_proj*norm_proj << std::endl;
-        std::cout << "-> Now the step length is      : " << norm_proj << std::endl;
+        
+        if(VERBOSE) {
+            std::cout << "-> The original step length was: " << step_length << std::endl;
+            std::cout << "sum squares " << (proj_x*proj_x + proj_y*proj_y + proj_z*proj_z) << std::endl;
+            std::cout << "difference " << abs((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z)-norm_proj*norm_proj) << std::endl;
+            std::cout << "squared:    " << norm_proj*norm_proj << std::endl;
+            std::cout << "-> Now the step length is      : " << norm_proj << std::endl;
+        }
     }
                                           
     
@@ -102,11 +113,8 @@ void Photon::reflectionPh( double r ) {//input: the radius of the cylinder taken
     double y0 = x->getY();
     double z0 = x->getZ();
     
-    std::cout << "-> Step length: " << step_length << std::endl;
-    
     //x->shift(proj_x/2, proj_y/2, proj_z/2);
     //std::cout << x->getX() << " " << x->getY() << " " << x->getZ() << std::endl;
-    
     
     //I take this point as an approximation of the intersection point. TO IMPROVE
     double x1 = x0 + proj_x/2;
@@ -119,7 +127,10 @@ void Photon::reflectionPh( double r ) {//input: the radius of the cylinder taken
     double z1 = z0 + proj_z/2;
     //std::cout << "z1 " << z1 << std::endl;
     
-    std::cout << "Difference with the radius" << sqrt(x1*x1+y1*y1) - r << std::endl;
+    if(VERBOSE) {
+        std::cout << "-> Step length: " << step_length << std::endl;
+        std::cout << "Difference with the radius" << sqrt(x1*x1+y1*y1) - r << std::endl;
+    }
     
     //double norm_shift   = sqrt(proj_x*proj_x + proj_y*proj_y + proj_z*proj_z);
     //std::cout << "norm_shift " << norm_shift << std::endl;
@@ -172,36 +183,38 @@ void Photon::reflectionPh( double r ) {//input: the radius of the cylinder taken
         
         //double temp_xy = sqrt(abs((shift_plan_new*shift_plan_new) - (proj_z*proj_z)));
         //std::cout << "temp_xy " << temp_xy << std::endl;
-        std::cout << "+++++++++++++Reflection on the lateral wall!++++++++++++++++++" << std::endl;
         
         proj_x = shift_normal_new*(-1.0*vers_r_x) - shift_plan*vers_r_y;
         proj_y  = -1.0*shift_normal_new*vers_r_y + shift_plan*vers_r_x;
         
-        std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y << ", " << proj_z << ")" << std::endl;
         norm_proj =  sqrt((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z));
-        std::cout << "-> Norm projection      : " << norm_proj << std::endl;
-        std::cout << "-> Original step length : " << step_length << std::endl;
         
+        if(VERBOSE) {
+            std::cout << "+++++++++++++Reflection on the lateral wall!++++++++++++++++++" << std::endl;
+            std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y << ", " << proj_z << ")" << std::endl;
+            std::cout << "-> Norm projection      : " << norm_proj << std::endl;
+            std::cout << "-> Original step length : " << step_length << std::endl;
+        }
         
         //x->shift(proj_x/2, proj_y/2, proj_z/2);
         
-    }
-    
-    
-    else if (x->getZ() >= 8.00 || x->getZ() <= 0.0) {//REFLECTION ON THE BOTTOM/TOP WALL
+    } else if (x->getZ() >= 8.00 || x->getZ() <= 0.0) {//REFLECTION ON THE BOTTOM/TOP WALL
         
         x->shift(-proj_x, -proj_y, -proj_z);
         
         proj_z = -1.0*proj_z; //update only the z direction
         
-        std::cout << "Reflection on the bottom/top wall!" << std::endl;
         x->shift(proj_x/2, proj_y/2, proj_z/2);
-        std::cout << "-> New photon position  : (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
-        std::cout << "-> New shift projection : (" << proj_x << ", " << proj_y << ", " << proj_z << ")" << std::endl;
+        
         norm_proj =  norm_proj = sqrt((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z));
-        std::cout << "-> Norm projection      : " << norm_proj << std::endl;
-        std::cout << "-> Original step length : " << step_length << std::endl;
-
+        
+        if(VERBOSE) {
+            std::cout << "Reflection on the bottom/top wall!" << std::endl;
+            std::cout << "-> New photon position  : (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
+            std::cout << "-> New shift projection : (" << proj_x << ", " << proj_y << ", " << proj_z << ")" << std::endl;
+            std::cout << "-> Norm projection      : " << norm_proj << std::endl;
+            std::cout << "-> Original step length : " << step_length << std::endl;
+        }
     }
 }
 
@@ -230,12 +243,7 @@ double Photon::getphi_out_ph() {
     return phi_ph_out;
 }
 
-
 int Photon::getnReflections() {
     return nReflections;
 }
 
-bool Photon::getcheckInside() {
-    return checkInside;
-    
-}

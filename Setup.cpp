@@ -4,28 +4,26 @@
 
 Setup::Setup( std::string type ): type_of_detector( type ) {
     
-    std::cout << "Type of detector: " << type_of_detector << std::endl;
-    
-    n = 1.1; //TODO
-    d = 0; //TODO
+    //Here you can set your detector's parameters   
+    n = 1.1; //refraction index
+    d = 0;   //cm distance of the trigger scintilators
     if( type_of_detector == "cylinder" ) {
-        r = 2.5; //cm raggio
-        h = 8.0; //cm altezza
+        r = 2.5; //cm radius
+        h = 8.0; //cm height
     }
     else if ( type_of_detector == "parallelepiped" ) {
-        r = 0; //TODO cm lato del quadrato di base
-        h = 0; //TODO cm altezza
+        r = 0; //cm square basis dimension
+        h = 0; //cm height
     }
     
-    std::cout << "Dimensions: \n   r = " << r << "\n   h = " << h << std::endl;
-    
-    std::random_device rdv;
-    gen.seed( rdv() );
+    std::cout << "* Type of detector: " << type_of_detector << std::endl;
+    std::cout << "* Dimensions of the detector: \n*   r = " << r << "\n*   h = " << h << std::endl;
+
 }
 
 Vector* Setup::generateInitialPoint() {
     
-    std::uniform_real_distribution<double> dist(0, 1);
+    std::uniform_real_distribution<double> dist(0,1);
     double x_0, y_0;
     double sign_x_0, sign_y_0;
     
@@ -55,11 +53,7 @@ Vector* Setup::generateInitialPoint() {
             y_0 = -r*dist( gen );
         }
     }
-    
-    std::cout << std::endl;
-    std::cout << "********************** SETUP INITIAL CONDITIONS **********************" << std::endl;
-    std::cout << "Initial point for a " << type_of_detector << ": (" << x_0 << ", " << y_0 << ", 0)" << std::endl;
-    
+        
     initialPoint = new Vector( x_0, y_0, 0 );
     return initialPoint;
     
@@ -84,9 +78,6 @@ double* Setup::generateInitialAngle() {
     }
     
     angle[0] = max_angle*dist( gen );
-    
-    std::cout << "Inizial angle on x,y plane  : " << angle[1] << std::endl;
-    std::cout << "Initial azimuthal angle     : " << angle[0] << std::endl;
     
     return angle;
 }

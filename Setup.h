@@ -13,16 +13,16 @@ public:
     double* generateInitialAngle();
     bool    checkPosition( Vector* x );
     double  getRadius();
-    double  getRefractionIndex(); //TODO make it static
+    double  getRefractionIndex();
     
 private:
     std::string type_of_detector;
-    double n;              //indice di rifrazione
-    double r;              //cm lato di base o raggio
-    double h;              //cm altezza
-    double d;              //cm distanza degli scintillatori
+    double n;              //refraction index
+    double r;              //cm radius 
+    double h;              //cm height
+    double d;              //cm distance from trigger scintillators
     Vector* initialPoint;  //coordinates of initial point
-    double angle[2];       //rad angoli di generazione
+    double angle[2];       //rad initial angles
     std::mt19937 gen;
     
 };

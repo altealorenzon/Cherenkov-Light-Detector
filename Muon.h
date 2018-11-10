@@ -8,7 +8,7 @@ class Muon: public Particle {
     
 public:
     Muon( Vector* x_0, double e, double theta_0, double phi_0, int anti = 1 );
-    void Cherenkov( double n);
+    void Cherenkov( double n );
     std::vector<Photon*>* getPhotonList();
     
 private:

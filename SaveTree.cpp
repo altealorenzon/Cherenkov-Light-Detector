@@ -7,6 +7,8 @@
 
 static void SaveTree( std::vector<Muon*>* muList ) {
     
+    std::cout << "* Saving events!" << std::endl;
+    
     int nEvents = muList->size();
     
     TFile *file = new TFile( "./output/Cherenkov_MC.root", "RECREATE" );
@@ -26,6 +28,9 @@ static void SaveTree( std::vector<Muon*>* muList ) {
     int phNumber;       tree->Branch( "phNumber",     &phNumber,     "phNumber/I"    );
     
     for( int i=0; i<nEvents; i++ ) {
+        
+        if(i%5==0) std::cout << "* ..." << int(i*1.0/nEvents*100) << "\% completed" << std::endl;
+        
         evNumber = i+1;
         
         //set all coordinates to (0,0,0)
@@ -78,5 +83,5 @@ static void SaveTree( std::vector<Muon*>* muList ) {
     
     tree->Write();
     file->Close();
-    
+    std::cout << "* ...100\% completed!" << std::endl;
 };

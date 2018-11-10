@@ -7,16 +7,14 @@ class Photon: public Particle {
 public:
     Photon( Vector* x_0, double e, double theta_0, double phi_0, int anti = 1 );
     
-    int  getnReflections();
+    int    getnReflections();
     double gettheta_out_ph();
     double getphi_out_ph();
-    bool getcheckInside();
-    void updatePositionPh( double theta_1, double phi_1, Setup* setup );
-    void rotateProjections(double theta_1, double phi_1);
-    void reflectionPh(double r); //returns the reflected position
-    //bool checkPositionPh();
-    void printSummary();
-    int getPosition_out();
+    void   updatePositionPh( double theta_1, double phi_1, Setup* setup );
+    void   rotateProjections(double theta_1, double phi_1);
+    void   reflectionPh(double r); //returns the reflected position
+    void   printSummary();
+    int    getPosition_out();
     
 private:
     int    nReflections; //number of reflections on the side walls
@@ -27,7 +25,6 @@ private:
     double theta_ph_out; //Azimuthal angle of the trajectory of the photon at the box exit
     double phi_ph_out  ; //x-y angle of the trjectory of the phton at the box exit
     int    position_out; //= 1 if the photon goes out through the bottom wall of the detector
-    bool   checkInside ;
 
 };
 

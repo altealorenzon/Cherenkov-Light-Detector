@@ -10,7 +10,6 @@ public:
     double getY();
     double getZ();
     void   shift( double x_1, double y_1, double z_1 );
-    //void   rotate( double theta, double phi );
     
 private:
     double x;
