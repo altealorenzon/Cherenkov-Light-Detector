@@ -23,7 +23,8 @@ private:
     double d;              //cm distance from trigger scintillators
     Vector* initialPoint;  //coordinates of initial point
     double angle[2];       //rad initial angles
-    std::mt19937 gen;
+    //std::mt19937 gen;
+    std::default_random_engine GEN;
     
 };
 

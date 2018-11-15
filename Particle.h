@@ -1,8 +1,8 @@
 #ifndef Particle_h
 #define Particle_h
 #include "Vector.h"
-#include <vector>
 #include "Setup.h"
+#include <vector>
 
 struct particles_data {
     particles_data( double mass = 0, double charge = 0, double step_length = 0): 
@@ -13,6 +13,9 @@ struct particles_data {
 };
 
 static bool VERBOSE = 0;
+
+static std::random_device rd;
+static std::default_random_engine gen( rd() );
 
 class Particle {
 
@@ -29,9 +32,12 @@ protected:
     double  v;                      // speed of the particle
     double  theta;                  // azimuthal angle of the particle' momentum
     double  phi;                    // angle on x,y plane of the particle' momentum
-    std::mt19937 gen;
+    //std::mt19937 gen;
+    //std::random_device rd;
+    //std::default_random_engine gen;
     
 public:
+    int                   nPos;
     int                   getID();
     double                getMass();
     double                getCharge();
@@ -42,7 +48,7 @@ public:
     void                  updatePosition();
     Vector*               getLastPosition();
     std::vector<Vector*>* getPositionList();
-        
+    
     static particles_data my_particles[30];
     static void setParticlesData();
     

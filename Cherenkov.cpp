@@ -4,6 +4,7 @@
 #include "Vector.h"
 #include "Muon.h"
 #include "SaveTree.cpp"
+#include "Photon.h"
 
 int main( int argc, char* argv[] ) {
     
@@ -55,6 +56,21 @@ int main( int argc, char* argv[] ) {
     
     //Save events in a root TTree
     SaveTree( muList );
+    
+    /*
+    int maxPos = 0;
+    for(int m = 0; m < muList->size(); m++) {
+    
+        Muon* mu = muList->at(m);
+        int maxPos_temp = mu->nPos;
+        std::vector<Photon*>* photons = mu->getPhotonList();
+        for(int p = 0; p < photons->size(); p++) {
+            if(photons->at(p)->nPos > maxPos_temp) maxPos_temp = photons->at(p)->nPos;
+        }
+        if(maxPos_temp > maxPos) maxPos = maxPos_temp;
+    
+    }
+    */
     
     std::cout << "*********************************************************" << std::endl;
     

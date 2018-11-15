@@ -13,7 +13,6 @@ public:
     
 private:
     std::vector<Photon*>* photons;
-    std::default_random_engine poisson_gen;
 };
 
 #endif

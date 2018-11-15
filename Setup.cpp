@@ -1,8 +1,12 @@
 #include <iostream>
 #include <cmath>
+#include <time.h>
 #include "Setup.h"
 
 Setup::Setup( std::string type ): type_of_detector( type ) {
+    
+    time_t timer;
+    GEN.seed( time(&timer) );
     
     //Here you can set your detector's parameters   
     n = 1.1; //refraction index
@@ -27,30 +31,30 @@ Vector* Setup::generateInitialPoint() {
     double x_0, y_0;
     double sign_x_0, sign_y_0;
     
-    sign_x_0 = dist( gen );
-    sign_y_0 = dist( gen );
+    sign_x_0 = dist( GEN );
+    sign_y_0 = dist( GEN );
     
     if( sign_x_0 >= 0.5 && sign_x_0 < 1) {
-        x_0 =  r*dist( gen );
+        x_0 =  r*dist( GEN );
     } 
     else {
-        x_0 = -r*dist( gen );
+        x_0 = -r*dist( GEN );
     }
     
     if( type_of_detector == "cylinder" ) {
         if( sign_y_0 >= 0.5 && sign_y_0 < 1) {
-            y_0 =  sqrt( 1 - x_0*x_0/r/r )*dist( gen );
+            y_0 =  sqrt( 1 - x_0*x_0/r/r )*dist( GEN );
         }
         else {
-            y_0 = -sqrt( 1 - x_0*x_0/r/r )*dist( gen );
+            y_0 = -sqrt( 1 - x_0*x_0/r/r )*dist( GEN );
         }
     }
     else if( type_of_detector == "parallelepiped" ) {
         if( sign_y_0 >= 0.5 && sign_y_0 < 1) {
-            y_0 =  r*dist( gen );
+            y_0 =  r*dist( GEN );
         } 
         else {
-            y_0 = -r*dist( gen );
+            y_0 = -r*dist( GEN );
         }
     }
         
@@ -62,7 +66,7 @@ Vector* Setup::generateInitialPoint() {
 double* Setup::generateInitialAngle() {
     
     std::uniform_real_distribution<double> dist(0, 1);
-    angle[1] = 2*M_PI*dist(gen); //angle on x,y plane
+    angle[1] = 2*M_PI*dist(GEN); //angle on x,y plane
     
     double max_angle;           //max azimuthal angle
     if( type_of_detector == "cylinder" ) {
@@ -77,7 +81,7 @@ double* Setup::generateInitialAngle() {
         }
     }
     
-    angle[0] = max_angle*dist( gen );
+    angle[0] = max_angle*dist( GEN );
     
     return angle;
 }

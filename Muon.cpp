@@ -12,22 +12,25 @@ void Muon::Cherenkov( double n ) {
     Vector* x_0 = this->getLastPosition();
     
     if( v > 1/n ) {
+
+        if(VERBOSE) std::cout << "I can do Cherenkov! "<< v << ">" << 1/n << std::endl;       
         
-        double lambda = 300000000; //fm
-        double theta_0 = acos( 1/v/n );
+        double theta_0  = acos( 1/v/n ); //Cherenkov angle
+        double k_prime  = 0.0010585;     //nm^-1 calculated with WolframAlpha
+        double efficiency_max = 0.2;
+        double k        = 2*M_PI*(1.0/137)*k_prime*efficiency_max; //nm^-1
+        double lambda_c = 1/(k*sin(theta_0)*sin(theta_0))*0.0000001; //cm
+        double lambda   = 300*1000000; //fm photon wavelength
+        
         std::uniform_real_distribution<double> unif_dist(0,1);
-        std::poisson_distribution<int> poisson_dist(5.0);
-        int nPhotonGenerated = poisson_dist( poisson_gen );
         
-        if(VERBOSE) {
-            std::cout << "I can do Cherenkov! "<< v << ">" << 1/n << std::endl;
-            std::cout << "Number of photons generated:" << nPhotonGenerated << std::endl;
-        }
-        
-        for( int nPh=0; nPh<nPhotonGenerated; ++nPh) {
+        if( unif_dist(gen)>lambda_c ) {
             Photon* ph = new Photon( new Vector(*x_0), 197.4/lambda, theta_0, 2*M_PI*unif_dist( gen ) );
             photons->push_back( ph );
-        } 
+        } else if(VERBOSE) {
+            std::cout << "No photons generated" << std::endl;
+        }
+        
     } 
     
     return;

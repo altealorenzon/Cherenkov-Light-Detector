@@ -2,11 +2,12 @@
 #include "Photon.h"
 #include <cmath>
 #include <iostream>
+#include <time.h>
 
 particles_data Particle::my_particles[30];
 
 Particle::Particle( int id, Vector* x_0, double e, double theta_0, double phi_0 ) :
-p_id( id ), x( x_0 ), energy( e ), theta( theta_0 ), phi( phi_0 ) {
+p_id( id ), x( x_0 ), energy( e ), theta( theta_0 ), phi( phi_0 ), nPos(0) {
     
     position = new std::vector<Vector*>();
     position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
@@ -61,6 +62,7 @@ double Particle::getSpeed() {
 }
 
 void Particle::updatePosition() {
+    this->nPos++;
     x->shift( step_length*sin(theta)*cos(phi), step_length*sin(theta)*sin(phi), step_length*cos(theta) );
     position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
     if(VERBOSE) std::cout << "New muon position: (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ") " << std::endl;
@@ -83,8 +85,8 @@ void Particle::setParticlesData() {
     for(int i = 0; i < 30; i++) {
         Particle::my_particles[i] = particles_data();
     }
-    //Here you can set mass, charge, step_length
-    Particle::my_particles[13] = particles_data( 105, -1, 0.05 );
+    //Here you can set mass (MeV), charge (e), step_length (cm)
+    Particle::my_particles[13] = particles_data( 105, -1, 0.006 );
     Particle::my_particles[22] = particles_data( 0, 0, 0.1 );
 }
 

@@ -7,7 +7,7 @@ Photon::Photon( Vector* x_0, double e, double theta_0, double phi_0, int anti ) 
 }
 
 void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
-    
+    this->nPos++;
     //Shift the photon position of one step length and check whether the photon is inside or outside the box.
     x->shift(proj_x, proj_y, proj_z); //these are the components of the shift in the global frame
     

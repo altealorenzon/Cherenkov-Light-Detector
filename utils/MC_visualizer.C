@@ -7,7 +7,7 @@
 
 void MC_visualizer() {
     
-    TFile *file = new TFile("Cherenkov_MC.root");
+    TFile *file = new TFile("../output/Cherenkov_MC.root");
     TTree *tree = (TTree*)file->Get("Cherenkov");
     
     Int_t position_out; tree->SetBranchAddress("position_out",&position_out);
