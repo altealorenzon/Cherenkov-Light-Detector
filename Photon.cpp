@@ -1,7 +1,6 @@
 #include "Photon.h"
 #include <iostream>
 
-
 Photon::Photon( Vector* x_0, double e, double theta_0, double phi_0, int anti ) : Particle( 22, x_0, e, theta_0, phi_0 ) {
     
 }
@@ -25,19 +24,43 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
     } else if ( setup->checkPosition(x) == false ) {
         
         std::uniform_real_distribution<double> dist(0, 1);
-        double ran = dist(gen); //generate random number in order to determine whether the photon is reflected or not.
+        double ran = dist(gen); //generate random number for absorption/reflection on lateral walls
+        double alpha = atan(abs(proj_x/proj_y))-atan(x->getX()/x->getY());
+        std::cout << alpha << std::endl;
+        
         if(VERBOSE) {
             std::cout << "Is it still inside? "<< setup->checkPosition(x) << std::endl;
             std::cout << "-> The random number is: " << ran << std::endl;
         }
+        //REFLECTION ON TOP/BOTTOM
+        if( ( x->getZ() >= setup->getHeight() || x->getZ() <= 0.0 ) && 
+            acos( proj_z/norm_proj )>= setup->getCriticalAngle() ) { 
+            
+            nReflections += 1;
+            
+            proj_z = -1.0*proj_z; //update only the z direction
         
-        if ( ran > 0.1) { //reflection true (TODO >=, <=)
+            x->shift(proj_x/2, proj_y/2, proj_z/2);
+            
+            position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
+            
+            //norm_proj = sqrt((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z));
+        
+            if(VERBOSE) {
+                    std::cout << "+++++++++++++Reflection on the bottom/top wall!+++++++++++++" << std::endl;
+                    std::cout << "-> New photon position  : (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
+                    std::cout << "-> New shift projection : (" << proj_x << ", " << proj_y << ", " << proj_z << ")" << std::endl;
+                    std::cout << "-> Norm projection      : " << norm_proj << std::endl;
+                    std::cout << "-> Original step length : " << step_length << std::endl;
+            }
+        //TOTAL REFLECTION ON LATERAL WALLS       
+        } else if ( alpha >= setup->getCriticalAngle() ) {
             
             nReflections += 1;
             //Remove the previous update in order to perform the reflection
             x->shift(-proj_x, -proj_y, -proj_z);
             //Do reflection
-            reflectionPh(setup->getRadius());
+            reflectionPhWall(setup->getRadius());
             //Update the position of the photon
             position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
             
@@ -47,7 +70,23 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
                 std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y<< ", " << proj_z << ")" << std::endl;
             }
             
-        
+        //HERE YOU CAN CHANGE THRESHOLD PARAMETER FOR REFLECTION/ABSORPTION ON THE WALLS 
+        } else if ( ran > 0.999 ) { 
+
+            nReflections += 1;
+            //Remove the previous update in order to perform the reflection
+            x->shift(-proj_x, -proj_y, -proj_z);
+            //Do reflection
+            reflectionPhWall(setup->getRadius());
+            //Update the position of the photon
+            position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
+            
+            if(VERBOSE) {
+                std::cout << "-> The photons was reflected!" << std::endl;
+                std::cout << "-> New photon position  : (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
+                std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y<< ", " << proj_z << ")" << std::endl;
+            }
+
         } else { //reflection false
             
             position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
@@ -56,9 +95,9 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
             phi_ph_out   = proj_x/(sqrt(proj_x*proj_x+proj_y*proj_y));
             
             //Check whether the photon exited from the bottom wall or not. Important to count the number of photons reaching the detector.
-            if ( x->getZ() > 8.00 ) {
+            if ( x->getZ() >= setup->getHeight() ) {
                 position_out = 1;
-            } else if (x->getZ() < 0.0 ) {
+            } else if (x->getZ() <= 0.0 ) {
                 position_out = -1; 
             } else {
                 position_out = 0;
@@ -106,7 +145,7 @@ void Photon::rotateProjections( double theta_1, double phi_1 ) {
     
 }
 
-void Photon::reflectionPh( double r ) {//input: the radius of the cylinder taken from setup
+void Photon::reflectionPhWall( double r ) {//input: the radius of the cylinder taken from setup
     
     double x0 = x->getX();
     double y0 = x->getY();
@@ -159,7 +198,7 @@ void Photon::reflectionPh( double r ) {//input: the radius of the cylinder taken
     x->shift(proj_x, proj_y, proj_z); //temporary update
     
     //If statement to determine whether the reflection was on the lateral or bottom/top wall.
-    if ( sqrt(x->getX()*x->getX() + x->getY()*x->getY()) >= r) {//REFLECTION ON THE LATERAL WALL.
+    //if ( sqrt(x->getX()*x->getX() + x->getY()*x->getY()) >= r) { // not necessary
         
         x->shift(-proj_x, -proj_y, -proj_z); //remove the temporary update.
         
@@ -197,7 +236,7 @@ void Photon::reflectionPh( double r ) {//input: the radius of the cylinder taken
         
         //x->shift(proj_x/2, proj_y/2, proj_z/2);
         
-    } else if (x->getZ() >= 8.00 || x->getZ() <= 0.0) {//REFLECTION ON THE BOTTOM/TOP WALL
+    /*} else if (x->getZ() >= 8.00 || x->getZ() <= 0.0) {//REFLECTION ON THE BOTTOM/TOP WALL
         
         x->shift(-proj_x, -proj_y, -proj_z);
         
@@ -205,7 +244,7 @@ void Photon::reflectionPh( double r ) {//input: the radius of the cylinder taken
         
         x->shift(proj_x/2, proj_y/2, proj_z/2);
         
-        norm_proj =  norm_proj = sqrt((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z));
+        norm_proj = sqrt((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z));
         
         if(VERBOSE) {
             std::cout << "Reflection on the bottom/top wall!" << std::endl;
@@ -214,9 +253,8 @@ void Photon::reflectionPh( double r ) {//input: the radius of the cylinder taken
             std::cout << "-> Norm projection      : " << norm_proj << std::endl;
             std::cout << "-> Original step length : " << step_length << std::endl;
         }
-    }
+    }*/
 }
-
 
 void Photon::printSummary() {
     

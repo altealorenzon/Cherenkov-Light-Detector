@@ -12,7 +12,7 @@ public:
     double getphi_out_ph();
     void   updatePositionPh( double theta_1, double phi_1, Setup* setup );
     void   rotateProjections(double theta_1, double phi_1);
-    void   reflectionPh(double r); //returns the reflected position
+    void   reflectionPhWall(double r); //returns the reflected position
     void   printSummary();
     int    getPosition_out();
     

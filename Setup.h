@@ -13,7 +13,9 @@ public:
     double* generateInitialAngle();
     bool    checkPosition( Vector* x );
     double  getRadius();
+    double  getHeight();
     double  getRefractionIndex();
+    double  getCriticalAngle();
     
 private:
     std::string type_of_detector;

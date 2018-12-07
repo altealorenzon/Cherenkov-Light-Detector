@@ -9,10 +9,10 @@ Setup::Setup( std::string type ): type_of_detector( type ) {
     GEN.seed( time(&timer) );
     
     //Here you can set your detector's parameters   
-    n = 1.1; //refraction index
-    d = 0;   //cm distance of the trigger scintilators
+    n = 1.49; //refraction index
+    d = 10;    //cm distance of the trigger scintilators
     if( type_of_detector == "cylinder" ) {
-        r = 2.5; //cm radius
+        r = 2.5;  //cm radius
         h = 8.0; //cm height
     }
     else if ( type_of_detector == "parallelepiped" ) {
@@ -22,7 +22,8 @@ Setup::Setup( std::string type ): type_of_detector( type ) {
     
     std::cout << "* Type of detector: " << type_of_detector << std::endl;
     std::cout << "* Dimensions of the detector: \n*   r = " << r << "\n*   h = " << h << std::endl;
-
+    std::cout << "* Distance of trigger scintillators: \n*   d = " << d << std::endl;
+    std::cout << "* Refraction index of the material: \n*   n = " << n << std::endl;
 }
 
 Vector* Setup::generateInitialPoint() {
@@ -90,7 +91,7 @@ bool Setup::checkPosition( Vector* x ) {
     
     double xpos = x->getX(), ypos = x->getY(), zpos = x->getZ();
     if( type_of_detector == "cylinder" ) {
-        return ( sqrt( xpos*xpos + ypos*ypos ) < r && zpos < h && zpos >= 0.0); //to verify whether to use <= or < (>= or >);
+        return ( sqrt( xpos*xpos + ypos*ypos ) < r && zpos < h && zpos >= 0.0); 
     }
     else if( type_of_detector == "parallelepiped" ) {
         return ( abs( xpos ) <= r/2 && abs( ypos ) <= r/2 && zpos <= h );
@@ -104,5 +105,12 @@ double Setup::getRefractionIndex() {
 
 double Setup::getRadius() {
     return r;
-    
+}
+
+double Setup::getHeight() {
+    return h;
+}
+
+double Setup::getCriticalAngle() {
+    return asin( 1/n );
 }

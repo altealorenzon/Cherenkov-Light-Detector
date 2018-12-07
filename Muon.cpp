@@ -24,7 +24,7 @@ void Muon::Cherenkov( double n ) {
         
         std::uniform_real_distribution<double> unif_dist(0,1);
         
-        if( unif_dist(gen)>lambda_c ) {
+        if( unif_dist(gen)<step_length/lambda_c ) {
             Photon* ph = new Photon( new Vector(*x_0), 197.4/lambda, theta_0, 2*M_PI*unif_dist( gen ) );
             photons->push_back( ph );
         } else if(VERBOSE) {

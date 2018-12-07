@@ -85,7 +85,7 @@ void Particle::setParticlesData() {
     for(int i = 0; i < 30; i++) {
         Particle::my_particles[i] = particles_data();
     }
-    //Here you can set mass (MeV), charge (e), step_length (cm)
+    //Here you can set mass (MeV), charge (e), step_length (cm) 0.006 cm PMMA 1.0 air/co2
     Particle::my_particles[13] = particles_data( 105, -1, 0.006 );
     Particle::my_particles[22] = particles_data( 0, 0, 0.1 );
 }
