@@ -5,6 +5,38 @@ Photon::Photon( Vector* x_0, double e, double theta_0, double phi_0, int anti ) 
     
 }
 
+void Photon::rotateProjections( double theta_1, double phi_1 ) {
+    
+    if (p_id == 22) { //not necessary
+        
+        long double temp_x;
+        long double temp_y;
+        long double temp_z;
+        
+        temp_x = step_length*sin(theta)*cos(phi);
+        temp_y = step_length*sin(theta)*sin(phi);
+        temp_z = step_length*cos(theta);
+        
+        //Update the private variables: component of the shift in the global frame
+        //This procedure could introduce an aproximation error.
+        proj_x = temp_x*cos(theta_1)*cos(phi_1) - temp_y*cos(theta_1)*sin(phi_1) + temp_z*sin(theta_1)*cos(phi_1);
+        proj_y = temp_x*cos(theta_1)*sin(phi_1) + temp_y*cos(theta_1)*cos(phi_1) + temp_z*sin(theta_1)*sin(phi_1);
+        proj_z = -temp_x*sin(theta_1) - temp_y*sin(theta_1) + temp_z*cos(theta_1);
+        
+        norm_proj = sqrt((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z));
+        
+        if(VERBOSE) {
+            std::cout << "-> The original step length was: " << step_length << std::endl;
+            std::cout << "sum squares " << (proj_x*proj_x + proj_y*proj_y + proj_z*proj_z) << std::endl;
+            std::cout << "difference " << abs((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z)-norm_proj*norm_proj) << std::endl;
+            std::cout << "squared:    " << norm_proj*norm_proj << std::endl;
+            std::cout << "-> Now the step length is      : " << norm_proj << std::endl;
+        }
+    }
+                                          
+    
+}
+
 void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
     this->nPos++;
     //Shift the photon position of one step length and check whether the photon is inside or outside the box.
@@ -25,8 +57,7 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
         
         std::uniform_real_distribution<double> dist(0, 1);
         double ran = dist(gen); //generate random number for absorption/reflection on lateral walls
-        double alpha = atan(abs(proj_x/proj_y))-atan(x->getX()/x->getY());
-        std::cout << alpha << std::endl;
+        double reflection_angle = getReflectionAngle(setup->getRadius());
         
         if(VERBOSE) {
             std::cout << "Is it still inside? "<< setup->checkPosition(x) << std::endl;
@@ -54,13 +85,13 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
                     std::cout << "-> Original step length : " << step_length << std::endl;
             }
         //TOTAL REFLECTION ON LATERAL WALLS       
-        } else if ( alpha >= setup->getCriticalAngle() ) {
+        } else if ( reflection_angle >= setup->getCriticalAngle() && ran <= 0.5 ) {
             
             nReflections += 1;
             //Remove the previous update in order to perform the reflection
             x->shift(-proj_x, -proj_y, -proj_z);
             //Do reflection
-            reflectionPhWall(setup->getRadius());
+            reflectionPhWall();
             //Update the position of the photon
             position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
             
@@ -77,7 +108,7 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
             //Remove the previous update in order to perform the reflection
             x->shift(-proj_x, -proj_y, -proj_z);
             //Do reflection
-            reflectionPhWall(setup->getRadius());
+            reflectionPhWall();
             //Update the position of the photon
             position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
             
@@ -111,48 +142,11 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
     }
 }
 
-
-
-void Photon::rotateProjections( double theta_1, double phi_1 ) {
-    
-    if (p_id == 22) { //not necessary
-        
-        long double temp_x;
-        long double temp_y;
-        long double temp_z;
-        
-        temp_x = step_length*sin(theta)*cos(phi);
-        temp_y = step_length*sin(theta)*sin(phi);
-        temp_z = step_length*cos(theta);
-        
-        //Update the private variables: component of the shift in the global frame
-        //This procedure could introduce an aproximation error.
-        proj_x = temp_x*cos(theta_1)*cos(phi_1) - temp_y*cos(theta_1)*sin(phi_1) + temp_z*sin(theta_1)*cos(phi_1);
-        proj_y = temp_x*cos(theta_1)*sin(phi_1) + temp_y*cos(theta_1)*cos(phi_1) + temp_z*sin(theta_1)*sin(phi_1);
-        proj_z = -temp_x*sin(theta_1) - temp_y*sin(theta_1) + temp_z*cos(theta_1);
-        
-        norm_proj = sqrt((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z));
-        
-        if(VERBOSE) {
-            std::cout << "-> The original step length was: " << step_length << std::endl;
-            std::cout << "sum squares " << (proj_x*proj_x + proj_y*proj_y + proj_z*proj_z) << std::endl;
-            std::cout << "difference " << abs((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z)-norm_proj*norm_proj) << std::endl;
-            std::cout << "squared:    " << norm_proj*norm_proj << std::endl;
-            std::cout << "-> Now the step length is      : " << norm_proj << std::endl;
-        }
-    }
-                                          
-    
-}
-
-void Photon::reflectionPhWall( double r ) {//input: the radius of the cylinder taken from setup
+double Photon::getReflectionAngle( double r ) { //input: the radius of the cylinder taken from setup
     
     double x0 = x->getX();
     double y0 = x->getY();
     double z0 = x->getZ();
-    
-    //x->shift(proj_x/2, proj_y/2, proj_z/2);
-    //std::cout << x->getX() << " " << x->getY() << " " << x->getZ() << std::endl;
     
     //I take this point as an approximation of the intersection point. TO IMPROVE
     double x1 = x0 + proj_x/2;
@@ -170,9 +164,6 @@ void Photon::reflectionPhWall( double r ) {//input: the radius of the cylinder t
         std::cout << "Difference with the radius" << sqrt(x1*x1+y1*y1) - r << std::endl;
     }
     
-    //double norm_shift   = sqrt(proj_x*proj_x + proj_y*proj_y + proj_z*proj_z);
-    //std::cout << "norm_shift " << norm_shift << std::endl;
-    
     //The three components of the versor u of the shift in order: necessary to computer the reflection angles.
     double vers_shift_x = proj_x/norm_proj; //I could use also step length
     //std::cout << "vers_shift_x " << vers_shift_x << std::endl;
@@ -183,24 +174,78 @@ void Photon::reflectionPhWall( double r ) {//input: the radius of the cylinder t
     
     //Compute the angle between the normal to the plane and the versor of the shift as the internal product between them. The normal to the plan is always the radius. Compute the versor of the radius. The coordinates of the radius are those of the intersection point.
     
-    double vers_r_x = x1/r;//this is cos of the angle between the radius and the x-axes
+    vers_r_x = x1/r;//this is cos of the angle between the radius and the x-axes
     //std::cout << "vers_r_x " << vers_r_x << std::endl;
-    double vers_r_y = y1/r;//this is cos of the angle between the radius and the y-axes
+    vers_r_y = y1/r;//this is cos of the angle between the radius and the y-axes
     //std::cout << "vers_r_y " << vers_r_y << std::endl;
-    double vers_r_z = 0;
+    vers_r_z = 0;
     
     
-    double cos_theta_0 = (vers_r_x*vers_shift_x) + (vers_r_y*vers_shift_y);//Derived by means of tringonometry
+    cos_theta_0 = (vers_r_x*vers_shift_x) + (vers_r_y*vers_shift_y);//Derived by means of tringonometry
     //std::cout << "theta_0 " << theta_0 << std::endl;
-    double cos_phi_0   = sqrt(1 - cos_theta_0*cos_theta_0);
+    cos_phi_0   = sqrt(1 - cos_theta_0*cos_theta_0);
     //std::cout << "phi_0 " << phi_0 << std::endl;
     
-    x->shift(proj_x, proj_y, proj_z); //temporary update
+    return acos(cos_theta_0);
+}
+
+
+void Photon::reflectionPhWall() {
+    
+    //double x0 = x->getX();
+    //double y0 = x->getY();
+    //double z0 = x->getZ();
+    
+    //x->shift(proj_x/2, proj_y/2, proj_z/2);
+    //std::cout << x->getX() << " " << x->getY() << " " << x->getZ() << std::endl;
+    
+    //I take this point as an approximation of the intersection point. TO IMPROVE
+    //double x1 = x0 + proj_x/2;
+    //std::cout << "x1 " << x1 << std::endl;
+    //double y1 = 0.0;
+    //double y1 = y0 + proj_y/2;
+    /*if ( y_control >= 0 ) { y1 = sqrt(r*r - x1*x1);}
+    else { y1 = -1.0*sqrt(r*r - x1*x1);}*/
+    //std::cout << "y1 " << y1 << std::endl;
+    //double z1 = z0 + proj_z/2;
+    //std::cout << "z1 " << z1 << std::endl;
+    
+    //if(VERBOSE) {
+    //    std::cout << "-> Step length: " << step_length << std::endl;
+    //    std::cout << "Difference with the radius" << sqrt(x1*x1+y1*y1) - r << std::endl;
+    //}
+    
+    //double norm_shift   = sqrt(proj_x*proj_x + proj_y*proj_y + proj_z*proj_z);
+    //std::cout << "norm_shift " << norm_shift << std::endl;
+    
+    //The three components of the versor u of the shift in order: necessary to computer the reflection angles.
+    //double vers_shift_x = proj_x/norm_proj; //I could use also step length
+    //std::cout << "vers_shift_x " << vers_shift_x << std::endl;
+    //double vers_shift_y = proj_y/norm_proj;
+    //std::cout << "vers_shift_y " << vers_shift_y << std::endl;
+    //double vers_shift_z = proj_z/norm_proj;
+    //std::cout << "vers_shift_z " << vers_shift_z << std::endl;
+    
+    //Compute the angle between the normal to the plane and the versor of the shift as the internal product between them. The normal to the plan is always the radius. Compute the versor of the radius. The coordinates of the radius are those of the intersection point.
+    
+    //double vers_r_x = x1/r;//this is cos of the angle between the radius and the x-axes
+    //std::cout << "vers_r_x " << vers_r_x << std::endl;
+    //double vers_r_y = y1/r;//this is cos of the angle between the radius and the y-axes
+    //std::cout << "vers_r_y " << vers_r_y << std::endl;
+    //double vers_r_z = 0;
+    
+    
+    //cos_theta_0 = (vers_r_x*vers_shift_x) + (vers_r_y*vers_shift_y);//Derived by means of tringonometry
+    //std::cout << "theta_0 " << theta_0 << std::endl;
+    //cos_phi_0   = sqrt(1 - cos_theta_0*cos_theta_0);
+    //std::cout << "phi_0 " << phi_0 << std::endl;
+    
+    //x->shift(proj_x, proj_y, proj_z); //temporary update
     
     //If statement to determine whether the reflection was on the lateral or bottom/top wall.
     //if ( sqrt(x->getX()*x->getX() + x->getY()*x->getY()) >= r) { // not necessary
         
-        x->shift(-proj_x, -proj_y, -proj_z); //remove the temporary update.
+        //x->shift(-proj_x, -proj_y, -proj_z); //remove the temporary update.
         
         //Find the component of the shift w.r. to the plan and it's normal vector.
         double shift_normal = step_length* cos_theta_0;
@@ -211,9 +256,9 @@ void Photon::reflectionPhWall( double r ) {//input: the radius of the cylinder t
         //std::cout << "shift_plan " << shift_plan << std::endl;
         
         //Find the new components of the shift versor after the reflection (w.r. to the plan)
-        double shift_normal_new = shift_normal;
+        //double shift_normal_new = shift_normal;
         //std::cout << "shift_normal_new " << shift_normal_new << std::endl;
-        double shift_plan_new = shift_plan;
+        //double shift_plan_new = shift_plan;
         //std::cout << "shift_plan_new " << shift_plan_new << std::endl;
         
         
@@ -222,8 +267,8 @@ void Photon::reflectionPhWall( double r ) {//input: the radius of the cylinder t
         //double temp_xy = sqrt(abs((shift_plan_new*shift_plan_new) - (proj_z*proj_z)));
         //std::cout << "temp_xy " << temp_xy << std::endl;
         
-        proj_x = shift_normal_new*(-1.0*vers_r_x) - shift_plan*vers_r_y;
-        proj_y  = -1.0*shift_normal_new*vers_r_y + shift_plan*vers_r_x;
+        proj_x = shift_normal*(-1.0*vers_r_x) - shift_plan*vers_r_y;
+        proj_y  = -1.0*shift_normal*vers_r_y + shift_plan*vers_r_x;
         
         norm_proj =  sqrt((proj_x*proj_x + proj_y*proj_y + proj_z*proj_z));
         
