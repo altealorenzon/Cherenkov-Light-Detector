@@ -16,6 +16,7 @@ public:
     double  getHeight();
     double  getRefractionIndex();
     double  getCriticalAngle();
+    std::string getTypeOfDetector();
     
 private:
     std::string type_of_detector;

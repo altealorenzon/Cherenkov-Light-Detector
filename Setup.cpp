@@ -99,7 +99,9 @@ bool Setup::checkPosition( Vector* x ) {
     
 }
 
-
+std::string Setup::getTypeOfDetector() {
+    return type_of_detector;
+}
 
 double Setup::getRefractionIndex() {
     return n;
