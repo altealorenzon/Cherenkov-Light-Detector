@@ -30,7 +30,7 @@ int main( int argc, char* argv[] ) {
         Vector* x_0   = setup->generateInitialPoint();
         double* angle = setup->generateInitialAngle(); // element 0 = theta, element 1 = phi
         
-        Muon* mu = new Muon( x_0, 4000, angle[0], angle[1] ); //TODO add charge
+        Muon* mu = new Muon( x_0, 4000, angle[0], angle[1] );
         mu->updatePosition();
         
         while ( setup->checkPosition( mu->getLastPosition() ) == true ) {

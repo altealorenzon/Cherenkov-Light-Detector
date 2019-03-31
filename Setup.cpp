@@ -16,8 +16,8 @@ Setup::Setup( std::string type ): type_of_detector( type ) {
         h = 8.0; //cm height
     }
     else if ( type_of_detector == "parallelepiped" ) {
-        r = 0; //cm square basis dimension
-        h = 0; //cm height
+        r = 6; //cm square basis dimension
+        h = 1; //cm height
     }
     
     std::cout << "* Type of detector: " << type_of_detector << std::endl;
@@ -94,7 +94,7 @@ bool Setup::checkPosition( Vector* x ) {
         return ( sqrt( xpos*xpos + ypos*ypos ) < r && zpos < h && zpos >= 0.0); 
     }
     else if( type_of_detector == "parallelepiped" ) {
-        return ( abs( xpos ) <= r/2 && abs( ypos ) <= r/2 && zpos <= h );
+        return ( abs( xpos ) <= r/2 && abs( ypos ) <= r/2 && zpos < h && zpos >= 0.0 );
     }
     
 }
