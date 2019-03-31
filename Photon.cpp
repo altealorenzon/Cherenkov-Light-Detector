@@ -54,17 +54,18 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
         }
         
     } else if ( setup->checkPosition(x) == false ) {
+        //reflection on walls is only implemented for a cylinder
+        if(setup->getTypeOfDetector() == "c" ) {
+            std::uniform_real_distribution<double> dist(0, 1);
+            double ran = dist(gen); //generate random number for absorption/reflection on lateral walls
+            double reflection_angle = getReflectionAngle(setup->getRadius());
         
-        //TODO uncomment this if you want reflection
-        /*std::uniform_real_distribution<double> dist(0, 1);
-        double ran = dist(gen); //generate random number for absorption/reflection on lateral walls
-        double reflection_angle = getReflectionAngle(setup->getRadius());
-        
-        if(VERBOSE) {
-            std::cout << "Is it still inside? "<< setup->checkPosition(x) << std::endl;
-            std::cout << "-> The random number is: " << ran << std::endl;
+            if(VERBOSE) {
+                std::cout << "Is it still inside? "<< setup->checkPosition(x) << std::endl;
+                std::cout << "-> The random number is: " << ran << std::endl;
+            }
         }
-        */
+        
         //REFLECTION ON TOP/BOTTOM
         if( ( x->getZ() >= setup->getHeight() || x->getZ() <= 0.0 ) && 
             acos( proj_z/norm_proj )>= setup->getCriticalAngle() ) { 
@@ -84,9 +85,9 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
                     std::cout << "-> Norm projection      : " << norm_proj << std::endl;
                     std::cout << "-> Original step length : " << step_length << std::endl;
             }
-        //TODO uncomment this if you want reflection
         //TOTAL REFLECTION ON LATERAL WALLS       
-        } /*else if ( reflection_angle >= setup->getCriticalAngle() && ran <= 0.5 ) {
+        } else if ( setup->getTypeOfDetector() == "c" && 
+                      reflection_angle >= setup->getCriticalAngle() && ran <= 0.5 ) {
             
             nReflections += 1;
             //Remove the previous update in order to perform the reflection
@@ -103,7 +104,7 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
             }
             
         //HERE YOU CAN CHANGE THRESHOLD PARAMETER FOR REFLECTION/ABSORPTION ON THE WALLS 
-        } else if ( ran > 0.999 ) { 
+        } else if ( setup->getTypeOfDetector() == "c" &&  ran > 0.999 ) { 
 
             nReflections += 1;
             //Remove the previous update in order to perform the reflection
@@ -119,7 +120,7 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
                 std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y<< ", " << proj_z << ")" << std::endl;
             }
         
-        }*/ else { //reflection false
+        } else { //reflection false
             
             position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
             //Determine the angles of the photon at the exit (useful to plot at the angular distribution);
