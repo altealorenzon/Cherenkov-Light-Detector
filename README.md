@@ -5,7 +5,10 @@ Code for MC Simulation of Cherenkov effect by cosmic rays in a given material.
 make
 
 # How to run
-./Cherenkov [number of events] [type of detector: cylinder/parallelepiped]
+./Cherenkov [number of events] [type of detector: c/p]
+
+c = cylinder
+p = parallelepiped
 
 # Note
 Some parameters are still encoded.

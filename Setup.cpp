@@ -11,11 +11,11 @@ Setup::Setup( std::string type ): type_of_detector( type ) {
     //Here you can set your detector's parameters   
     n = 1.49; //refraction index
     d = 10;    //cm distance of the trigger scintilators
-    if( type_of_detector == "cylinder" ) {
+    if( type_of_detector == "c" ) {
         r = 2.5;  //cm radius
         h = 8.0; //cm height
     }
-    else if ( type_of_detector == "parallelepiped" ) {
+    else if ( type_of_detector == "p" ) {
         r = 6; //cm square basis dimension
         h = 1; //cm height
     }
@@ -42,7 +42,7 @@ Vector* Setup::generateInitialPoint() {
         x_0 = -r*dist( GEN );
     }
     
-    if( type_of_detector == "cylinder" ) {
+    if( type_of_detector == "c" ) {
         if( sign_y_0 >= 0.5 && sign_y_0 < 1) {
             y_0 =  sqrt( 1 - x_0*x_0/r/r )*dist( GEN );
         }
@@ -50,7 +50,7 @@ Vector* Setup::generateInitialPoint() {
             y_0 = -sqrt( 1 - x_0*x_0/r/r )*dist( GEN );
         }
     }
-    else if( type_of_detector == "parallelepiped" ) {
+    else if( type_of_detector == "p" ) {
         if( sign_y_0 >= 0.5 && sign_y_0 < 1) {
             y_0 =  r*dist( GEN );
         } 
@@ -70,10 +70,10 @@ double* Setup::generateInitialAngle() {
     angle[1] = 2*M_PI*dist(GEN); //angle on x,y plane
     
     double max_angle;           //max azimuthal angle
-    if( type_of_detector == "cylinder" ) {
+    if( type_of_detector == "c" ) {
         max_angle = atan2( r, d+h/2 );
     }
-    else if( type_of_detector == "parallelepiped" ) {
+    else if( type_of_detector == "p" ) {
         if( ( angle[0]>M_PI/4 && angle[0]<3*M_PI/4 ) || ( angle[0]>5*M_PI/4 && angle[0]<7*M_PI/4) ) {
             max_angle = atan2( r/2/sin( angle[0] ), d+h/2 );
         } 
@@ -90,14 +90,16 @@ double* Setup::generateInitialAngle() {
 bool Setup::checkPosition( Vector* x ) {
     
     double xpos = x->getX(), ypos = x->getY(), zpos = x->getZ();
-    if( type_of_detector == "cylinder" ) {
+    if( type_of_detector == "c" ) {
         return ( sqrt( xpos*xpos + ypos*ypos ) < r && zpos < h && zpos >= 0.0); 
     }
-    else if( type_of_detector == "parallelepiped" ) {
+    else if( type_of_detector == "p" ) {
         return ( abs( xpos ) <= r/2 && abs( ypos ) <= r/2 && zpos < h && zpos >= 0.0 );
     }
     
 }
+
+
 
 double Setup::getRefractionIndex() {
     return n;
