@@ -1,3 +1,25 @@
+/************************************************************************
+*			PM_plane_visualizer.C                    	*
+*************************************************************************
+* -> To run the macto:							*
+*    > root								*
+*    > .L PM_plane_visualizer.C						*
+*									*
+* -> To see the tracks in one event:				        *
+*    > event_display("filename with path", event number, true/false)    *
+*       -> choose true if the radiator is a parallelepiped		*
+*	-> choose false if it is a cylinder				*
+*									*
+* -> To see the number of photons produced per event:			*   
+*    > photon_statistics("filename with path")				*
+*									*
+* -> To see the signals in the PM plane and the ratio of photons	*
+*    that exit from the top and from the bottom of the radiator:	*
+*    > PM_plane_visualizer("filename with path", event number)		*
+*									*
+*************************************************************************/
+
+
 void PM_plane_visualizer( TString file_name, Int_t event_number ) {
     
     TFile *file = new TFile(file_name);
@@ -7,10 +29,9 @@ void PM_plane_visualizer( TString file_name, Int_t event_number ) {
     Int_t id;           tree->SetBranchAddress("id",&id); 
     Int_t position_out; tree->SetBranchAddress("position_out",&position_out);
     Double_t x_PM;      tree->SetBranchAddress("x_PM",&x_PM);
-    
     Double_t y_PM;      tree->SetBranchAddress("y_PM",&y_PM);
     
-    TH1F* phPosOut = new TH1F("phPosOut"," bottom = 1 / walls = 0 /top = -1",3,-1.5,1.5);
+    TH1F* phPosOut = new TH1F("phPosOut","",3,-1.5,1.5);
     TH2F* PMphXY   = new TH2F("PMphXY","",16,-4.9,4.9,16,-4.9,4.9);
     TMarker* mu;
     Int_t nEntries = tree->GetEntries();
@@ -29,22 +50,32 @@ void PM_plane_visualizer( TString file_name, Int_t event_number ) {
     }
     
     Double_t Top_over_Bottom = phPosOut->GetBinContent(1)/phPosOut->GetBinContent(3);
-    
-    TPaveText* pt = new TPaveText(0.05,0.93,0.35,0.85,"NB" "NDC");
-    pt->AddText(Form("Top/Bottom = %f %%", Top_over_Bottom*100));
+    Double_t Walls_over_Bottom = phPosOut->GetBinContent(2)/phPosOut->GetBinContent(3);
+    TPaveText* pt = new TPaveText(0.1260745,0.8463158,0.491404,0.9410526,"NBNDC");
+    pt->SetTextFont(42);
+    pt->SetTextSize(0.04210526);
+    pt->AddText(Form("Top/Bottom   = %f %%", Top_over_Bottom*100));
+    pt->AddText(Form("Walls/Bottom = %f %%", Walls_over_Bottom*100));
     
     TCanvas* c = new TCanvas();
     phPosOut->SetStats(0);
     phPosOut->SetFillColor(kAzure-8);
     phPosOut->SetLineColor(kAzure-8);
+    TAxis* xaxis = (TAxis*)phPosOut->GetXaxis();
+    xaxis->SetBinLabel(1,"Top");
+    xaxis->SetBinLabel(2,"Walls");
+    xaxis->SetBinLabel(3,"Bottom");
+    xaxis->SetTickLength(0.0);
+    xaxis->SetLabelFont(42);
+    xaxis->SetLabelSize(0.07);
     phPosOut->Draw();
     pt->Draw();
     //c->SaveAs("top-bottom.pdf");
     
-    TLine* left  = new TLine( -2.6, 2.6,-2.6,-2.6 );
-    TLine* right = new TLine(  2.6, 2.6, 2.6,-2.6 );
-    TLine* up    = new TLine( -2.6, 2.6, 2.6, 2.6 );
-    TLine* down  = new TLine( -2.6,-2.6, 2.6,-2.6 );
+    TLine* left  = new TLine( -2.45, 2.45,-2.45,-2.45 );
+    TLine* right = new TLine(  2.45, 2.45, 2.45,-2.45 );
+    TLine* up    = new TLine( -2.45, 2.45, 2.45, 2.45 );
+    TLine* down  = new TLine( -2.45,-2.45, 2.45,-2.45 );
     //TEllipse* circle = new TEllipse( 0.0,0.0,1.0,1.0 );
     //circle->SetFillColorAlpha(0,0.0);
     
@@ -116,7 +147,6 @@ void photon_statistics( TString file_name ) {
     pt->Draw();
 }
 
-//SOLO PER PARALLELEPIPEDO
 void event_display( TString file_name, Int_t evNumber, bool Is_Parallelepyped=false ) {
     TFile *file = new TFile(file_name);
     TTree *tree = (TTree*)file->Get("Cherenkov");
