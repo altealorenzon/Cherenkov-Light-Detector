@@ -9,10 +9,10 @@ make
 ./Cherenkov [number of events] [type of detector: c/p] [lateral walls property: r/a]
 
 where:
-c = cylinder
-p = parallelepiped
-r = reflecting lateral walls
-a = absorbing lateral walls
+* c = cylinder
+* p = parallelepiped
+* r = reflecting lateral walls
+* a = absorbing lateral walls
 
 # Note
 Some parameters are still encoded.
@@ -26,5 +26,5 @@ Total reflection on lateral wall is implemented only for a cylinder.
 The choiche of absorbing/reflecting lateral walls can be done only for a cylinder. Lateral walls of a parallelepiped are always absorbing.
 
 # About the directories
-* The output directory contains the ROOT tuples produced running the Cherenkov simulation.
-* The utils directory contains a ROOT macro to visualize the signals in the PMT plane and some photons' statistics from the simulation.
+* The *output* directory contains the ROOT tuples produced running the Cherenkov simulation.
+* The *utils* directory contains a ROOT macro to visualize the signals in the PMT plane and some photons' statistics from the simulation.
