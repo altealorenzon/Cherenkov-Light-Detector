@@ -1,2 +1,5 @@
 Cherenkov
-output/*
+output/Cherenkov*
+output/*.pdf
+output/*.root
+
