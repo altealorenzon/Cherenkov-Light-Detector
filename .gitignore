@@ -1,5 +1,6 @@
-Cherenkov
-output/Cherenkov*
-output/*.pdf
-output/*.root
 
+MC-Simulation/Cherenkov
+MC-Simulation/output/*
+!MC-Simulation/output/.gitkeep
+Data-Analysis/ascii/*
+!Data-Analysis/ascii/.gitkeep
