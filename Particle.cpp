@@ -61,6 +61,14 @@ double Particle::getSpeed() {
     return v;
 }
 
+double Particle::getTheta() {
+    return theta;
+}
+
+double Particle::getPhi() {
+    return phi;
+}
+
 void Particle::updatePosition() {
     this->nPos++;
     x->shift( step_length*sin(theta)*cos(phi), step_length*sin(theta)*sin(phi), step_length*cos(theta) );
@@ -68,6 +76,11 @@ void Particle::updatePosition() {
     if(VERBOSE) std::cout << "New muon position: (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ") " << std::endl;
 }
 
+void Particle::hitPM( double distance, double theta_prime, double phi_prime ) {
+    this->nPos++;
+    x->shift( distance/cos(theta_prime)*sin(theta_prime)*cos(phi_prime), distance/cos(theta_prime)*sin(theta_prime)*sin(phi_prime), distance );
+    position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
+}
 
 Vector* Particle::getX() {
     return x;

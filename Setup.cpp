@@ -3,21 +3,23 @@
 #include <time.h>
 #include "Setup.h"
 
-Setup::Setup( std::string type ): type_of_detector( type ) {
+Setup::Setup( std::string type, std::string ref ): type_of_detector( type ), reflection( ref ) {
     
     time_t timer;
     GEN.seed( time(&timer) );
     
     //Here you can set your detector's parameters   
-    n = 1.49; //refraction index
-    d = 10;    //cm distance of the trigger scintilators
+    n = 1.4; //refraction index
+    d = 100;   //cm distance of the trigger scintillators
+    PMdistance = 0.6; //cm distance of PM plane from radiator
+    
     if( type_of_detector == "c" ) {
-        r = 2.5;  //cm radius
-        h = 8.0; //cm height
+        r = 1.0;  //cm radius
+        h = 1.0; //cm height
     }
     else if ( type_of_detector == "p" ) {
-        r = 6; //cm square basis dimension
-        h = 1; //cm height
+        r = 6.0; //cm square basis dimension
+        h = 1.0; //cm height
     }
     
     std::cout << "* Type of detector: " << type_of_detector << std::endl;
@@ -35,14 +37,13 @@ Vector* Setup::generateInitialPoint() {
     sign_x_0 = dist( GEN );
     sign_y_0 = dist( GEN );
     
-    if( sign_x_0 >= 0.5 && sign_x_0 < 1) {
-        x_0 =  r*dist( GEN );
-    } 
-    else {
-        x_0 = -r*dist( GEN );
-    }
-    
     if( type_of_detector == "c" ) {
+        if( sign_x_0 >= 0.5 && sign_x_0 < 1) {
+            x_0 =  r*dist( GEN );
+        } 
+        else {
+            x_0 = -r*dist( GEN );
+        }
         if( sign_y_0 >= 0.5 && sign_y_0 < 1) {
             y_0 =  sqrt( 1 - x_0*x_0/r/r )*dist( GEN );
         }
@@ -51,11 +52,17 @@ Vector* Setup::generateInitialPoint() {
         }
     }
     else if( type_of_detector == "p" ) {
-        if( sign_y_0 >= 0.5 && sign_y_0 < 1) {
-            y_0 =  r*dist( GEN );
+        if( sign_x_0 >= 0.5 && sign_x_0 < 1) {
+            x_0 =  r/2*dist( GEN );
         } 
         else {
-            y_0 = -r*dist( GEN );
+            x_0 = -r/2*dist( GEN );
+        }
+        if( sign_y_0 >= 0.5 && sign_y_0 < 1) {
+            y_0 =  r/2*dist( GEN );
+        } 
+        else {
+            y_0 = -r/2*dist( GEN );
         }
     }
         
@@ -115,6 +122,16 @@ double Setup::getHeight() {
     return h;
 }
 
+double Setup::getPMdistance() {
+    return PMdistance;
+}
+
 double Setup::getCriticalAngle() {
     return asin( 1/n );
+}
+
+double Setup::ReflectionThreshold() {
+    //here you can change the reflection/absorption threshold
+    if( reflection == "r" ) return 0.2;
+    if( reflection == "a" ) return 0.999;
 }

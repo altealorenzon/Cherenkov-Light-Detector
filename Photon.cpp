@@ -54,28 +54,32 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
         }
         
     } else if ( setup->checkPosition(x) == false ) {
-        //reflection on walls is only implemented for a cylinder
+
+        double ran = -1;
+        double reflection_angle = 0;
+        
         if(setup->getTypeOfDetector() == "c" ) {
             std::uniform_real_distribution<double> dist(0, 1);
-            double ran = dist(gen); //generate random number for absorption/reflection on lateral walls
-            double reflection_angle = getReflectionAngle(setup->getRadius());
+            ran = dist(gen); //generate random number for absorption/reflection on lateral walls
+            reflection_angle = getReflectionAngle(setup->getRadius());
         
             if(VERBOSE) {
                 std::cout << "Is it still inside? "<< setup->checkPosition(x) << std::endl;
+                std::cout << "-> Photon position  : (" << x->getX() << ", " << x->getY() << ", " << x->getZ() << ")" << std::endl;
+                std::cout << "-> sin(theta)*n =" << setup->getRefractionIndex()*sin( acos( proj_z/norm_proj) ) << std::endl;
                 std::cout << "-> The random number is: " << ran << std::endl;
             }
         }
-        
         //REFLECTION ON TOP/BOTTOM
         if( ( x->getZ() >= setup->getHeight() || x->getZ() <= 0.0 ) && 
-            acos( proj_z/norm_proj )>= setup->getCriticalAngle() ) { 
+            setup->getRefractionIndex()*sin( acos( proj_z/norm_proj ) ) >= 1 ) { 
             
             nReflections += 1;
             
             proj_z = -1.0*proj_z; //update only the z direction
         
-            x->shift(proj_x/2, proj_y/2, proj_z/2);
-            
+            //x->shift(proj_x/2, proj_y/2, proj_z/2);
+            x->shift(proj_x, proj_y, proj_z);
             position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
         
             if(VERBOSE) {
@@ -103,8 +107,7 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
                 std::cout << "-> New shift projections: (" << proj_x << ", " << proj_y<< ", " << proj_z << ")" << std::endl;
             }
             
-        //HERE YOU CAN CHANGE THRESHOLD PARAMETER FOR REFLECTION/ABSORPTION ON THE WALLS 
-        } else if ( setup->getTypeOfDetector() == "c" &&  ran > 0.999 ) { 
+        } else if ( setup->getTypeOfDetector() == "c" &&  ran > setup->ReflectionThreshold() ) { 
 
             nReflections += 1;
             //Remove the previous update in order to perform the reflection
@@ -124,9 +127,12 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
             
             position->push_back( new Vector( x->getX(), x->getY(), x->getZ() ) );
             //Determine the angles of the photon at the exit (useful to plot at the angular distribution);
-            theta_ph_out = proj_z/norm_proj; //I use step length instead of norm projection
-            phi_ph_out   = proj_x/(sqrt(proj_x*proj_x+proj_y*proj_y));
-            
+            theta_ph_out = acos( proj_z/norm_proj ); 
+            if( proj_y >=0 ) {
+                phi_ph_out = acos( proj_x/(sqrt(proj_x*proj_x+proj_y*proj_y)) );
+            } else {
+                phi_ph_out = - acos( proj_x/(sqrt(proj_x*proj_x+proj_y*proj_y)) );
+            }
             //Check whether the photon exited from the bottom wall or not. 
             //Important to count the number of photons reaching the detector.
             if ( x->getZ() >= setup->getHeight() ) {
@@ -139,6 +145,7 @@ void Photon::updatePositionPh( double theta_1, double phi_1, Setup* setup ) {
             
             if(VERBOSE) {
                 std::cout << "-> No reflection, the photon is out of the box!"<< std::endl;
+                std::cout << "-> Position out: " << position_out << std::endl;
                 printSummary();
             }
         }
@@ -219,11 +226,11 @@ int Photon::getPosition_out() {
     return position_out;
 }
 
-double Photon::gettheta_out_ph() {
+double Photon::getThetaOut_ph() {
     return theta_ph_out;
 }
 
-double Photon::getphi_out_ph() {
+double Photon::getPhiOut_ph() {
     return phi_ph_out;
 }
 

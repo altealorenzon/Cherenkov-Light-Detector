@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include "Setup.h"
 #include "Vector.h"
 #include "Muon.h"
@@ -18,7 +19,7 @@ int main( int argc, char* argv[] ) {
     std::cout << "* Number of events: " << nEvents << std::endl;
     
     //Choice of the setup geometry
-    Setup* setup = new Setup( argv[2] );
+    Setup* setup = new Setup( argv[2], argv[3] );
     
     std::vector<Muon*>* muList = new std::vector<Muon*>();
     
@@ -39,6 +40,7 @@ int main( int argc, char* argv[] ) {
             mu->updatePosition();
         }
         
+        mu->hitPM( setup->getPMdistance(), angle[0], angle[1] );
         //Propagation of photons
         std::vector<Photon*>* phList = mu->getPhotonList();
         
@@ -49,15 +51,18 @@ int main( int argc, char* argv[] ) {
                 //new position in the global rf
                 phList->at( j )->updatePositionPh( angle[0], angle[1], setup);
             }
+            if( phList->at( j )->getPosition_out() == 1 ) {
+                double theta_prime = asin( setup->getRefractionIndex()*sin( phList->at( j )->getThetaOut_ph() ) );
+                double phi_prime   = phList->at( j )->getPhiOut_ph();
+                
+                phList->at( j )->hitPM( setup->getPMdistance(), theta_prime, phi_prime );
+            }  
         }
         
         muList->push_back( mu );
     }
     
     //Save events in a root TTree
-    SaveTree( muList );
-    
-    /*
     int maxPos = 0;
     for(int m = 0; m < muList->size(); m++) {
     
@@ -70,8 +75,8 @@ int main( int argc, char* argv[] ) {
         if(maxPos_temp > maxPos) maxPos = maxPos_temp;
     
     }
-    */
-    
+    SaveTree( muList, maxPos );
+
     std::cout << "*********************************************************" << std::endl;
     
     return 0;

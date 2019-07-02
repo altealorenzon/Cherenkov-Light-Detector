@@ -11,6 +11,8 @@ void Muon::Cherenkov( double n ) {
     double v = this->getSpeed();
     Vector* x_0 = this->getLastPosition();
     
+    if(VERBOSE && v < 1/n) std::cout << "I can't do Cherenkov! " << std::endl;
+    
     if( v > 1/n ) {
 
         if(VERBOSE) std::cout << "I can do Cherenkov! "<< v << ">" << 1/n << std::endl;       

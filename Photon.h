@@ -8,8 +8,8 @@ public:
     Photon( Vector* x_0, double e, double theta_0, double phi_0, int anti = 1 );
     
     int    getnReflections();
-    double gettheta_out_ph();
-    double getphi_out_ph();
+    double getThetaOut_ph();
+    double getPhiOut_ph();
     double getReflectionAngle(double r);
     void   updatePositionPh( double theta_1, double phi_1, Setup* setup );
     void   rotateProjections(double theta_1, double phi_1);

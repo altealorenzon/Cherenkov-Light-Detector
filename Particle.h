@@ -45,7 +45,10 @@ public:
     double                getP();
     Vector*               getX();
     double                getSpeed();
+    double                getTheta();
+    double                getPhi();
     void                  updatePosition();
+    void                  hitPM( double distance, double theta_prime, double phi_prime ); 
     Vector*               getLastPosition();
     std::vector<Vector*>* getPositionList();
     
