@@ -4,3 +4,6 @@ MC-Simulation/output/*
 !MC-Simulation/output/.gitkeep
 Data-Analysis/ascii/*
 !Data-Analysis/ascii/.gitkeep
+MC-Simulation/utils/*.txt
+MC-Simulation/utils/*.png
+

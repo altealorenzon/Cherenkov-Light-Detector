@@ -25,8 +25,8 @@ static void SaveTree( std::vector<Muon*>* muList, int maxPos ) {
     int id;             tree->Branch( "id",           &id,           "id/I"          );
     double energy;      tree->Branch( "energy",       &energy,       "energy/D"      );
     double x[maxPos];   tree->Branch( "x",             x,             xstring);
-    double y[maxPos];   tree->Branch( "y",             y,            ystring  ); 
-    double z[maxPos];   tree->Branch( "z",             z,            zstring );
+    double y[maxPos];   tree->Branch( "y",             y,             ystring  ); 
+    double z[maxPos];   tree->Branch( "z",             z,             zstring );
     double theta_out;   tree->Branch( "theta_out",    &theta_out,    "theta_out/D"   );
     double phi_out;     tree->Branch( "phi_out",      &phi_out,      "phi_out/D"     );
     int position_out;   tree->Branch( "position_out", &position_out, "position_out/I");
