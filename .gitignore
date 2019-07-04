@@ -4,6 +4,9 @@ MC-Simulation/output/*
 !MC-Simulation/output/.gitkeep
 Data-Analysis/ascii/*
 !Data-Analysis/ascii/.gitkeep
+Data-Analysis/*.dat
+Data-Analysis/*.root
+Data-Analysis/treeSiliconBig.C
 MC-Simulation/utils/*.txt
 MC-Simulation/utils/*.png
 
