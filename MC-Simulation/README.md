@@ -26,5 +26,8 @@ Total reflection on lateral wall is implemented only for a cylinder.
 The choiche of absorbing/reflecting lateral walls can be done only for a cylinder. Lateral walls of a parallelepiped are always absorbing.
 
 # About the directories
-* The *output* directory contains the ROOT tuples produced running the Cherenkov simulation.
-* The *utils* directory contains a ROOT macro to visualize the signals in the PMT plane and some photons' statistics from the simulation.
+* The *output* directory will contain the ROOT tuples produced running the Cherenkov simulation.
+* The *utils* directory contains: 
+  * the ROOT macro PM_Plane_visulaizer.C to visualize the signals in the PMT plane and some photons' statistics from the simulation.
+  * the ROOT macro ProduceArraysForEventDisplay.C which must be run before the script EventDisplay.py
+  * the python script EventDisplay.py which produces a 3D graphic of the tracks in one event.
