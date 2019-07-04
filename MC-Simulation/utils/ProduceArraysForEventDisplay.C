@@ -23,7 +23,7 @@ void ProduceArrays(TString file_name, Int_t event_number) {
     	for(Int_t iEntry=0; iEntry<nEntries; ++iEntry) {
         	tree->GetEntry(iEntry); //each entry is a particle
         	for(Int_t i=0; i<168; ++i) {
-        		if(id==22 && evNumber==event_number && x[i]>-999){
+        		if(id==22 && evNumber==event_number && x[i]>-999 && z[i]<=1){
         			fx_ph << x[i] << endl;
         			fy_ph << y[i] << endl;
         			fz_ph << -z[i]+1. << endl;

@@ -31,20 +31,31 @@ theta = np.linspace(0, 1 * np.pi, 100)
 t, theta = np.meshgrid(t, theta)
 #generate coordinates for surface
 X, Y, Z = [v[i] * t + R * np.sin(theta) * n1[i] + R * np.cos(theta) * n2[i] for i in [0, 1, 2]]
-ax.plot_surface(X, Y, Z, cmap=cm.Blues, linewidth=0)#, antialiased=False)
-
+ax.plot_surface(X, Y, Z, cmap=cm.Blues, linewidth=0, antialiased=False)
+#load muon coordinates
 mu_xdata = np.loadtxt("mu_x.txt")
 mu_ydata = np.loadtxt("mu_y.txt")
 mu_zdata = np.loadtxt("mu_z.txt")
-ax.scatter3D(mu_xdata, mu_ydata, mu_zdata, c=mu_zdata, cmap=cm.Reds);
-
+mu = ax.scatter3D(mu_xdata, mu_ydata, mu_zdata, s=2, c=mu_zdata, cmap=cm.Reds);
+#load photons coordinates
 ph_xdata = np.loadtxt("ph_x.txt")
 ph_ydata = np.loadtxt("ph_y.txt")
 ph_zdata = np.loadtxt("ph_z.txt")
-ax.scatter3D(ph_xdata, ph_ydata, ph_zdata, c=ph_zdata, cmap=cm.Greens);
-
+ph = ax.scatter3D(ph_xdata, ph_ydata, ph_zdata, s=2, c=ph_zdata, cmap=cm.Greens);
 #space axis
 ax.set_xlim(-1.1, 1.1)
 ax.set_ylim(-1.1, 1.1)
 ax.set_zlim(0, 1.1)
+ax.set_xlabel('x [cm]')
+ax.set_ylabel('y [cm]')
+ax.set_zlabel('z [cm]')
+ax_ticks = ([-1., -0.5, 0., 0.5, 1.])
+ax.set_xticks(ax_ticks)
+ax.set_yticks(ax_ticks)
+#color barsticks=[-1, 0, 1]
+mu_cbar = fig.colorbar(mu, ticks=[0.2, 0.4, 0.6, 0.8], shrink=0.8)
+ph_cbar = fig.colorbar(ph, ticks=[0.2, 0.4, 0.6, 0.8], shrink=0.8)
+mu_cbar.ax.set_ylabel('z coordinate of muon [cm]')
+ph_cbar.ax.set_ylabel('z coordinate of photons [cm]')
+
 plt.show()
