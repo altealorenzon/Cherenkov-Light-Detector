@@ -32,6 +32,7 @@
  * $ root -l -q Reader.C+(SiRunNumber)
  * 
  */
+ 
 #include <fstream>
 
 const Int_t nSiLayers = 2;
@@ -60,7 +61,7 @@ void printEvent( Ev_t &Ev );
 
 void ReadEvent( Int_t SiRunNumber, bool debug=false ) {
 
-	TString outFile(Form("/home/altea/Documents/Cherenkov_Analysis/run%i.root",SiRunNumber));
+	TString outFile(Form("/home/altea/Documents/Cherenkov-Light-Detector/Data-Analysis/run%i.root",SiRunNumber));
 	TFile* file = new TFile( outFile,"recreate" );
 	TTree* tree = new TTree("Cherenkov","Tree with data from PMT, Silicon detectors and Scintillators in Cherenkov experiment");
 
