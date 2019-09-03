@@ -53,7 +53,7 @@ void PM_plane_visualizer( TString file_name, Int_t event_number ) {
     Double_t Walls_over_Bottom = phPosOut->GetBinContent(2)/phPosOut->GetBinContent(3);
     TPaveText* pt = new TPaveText(0.1260745,0.8463158,0.491404,0.9410526,"NBNDC");
     pt->SetTextFont(42);
-    pt->SetTextSize(0.04210526);
+    pt->SetTextSize(0.07);
     pt->AddText(Form("Top/Bottom   = %f %%", Top_over_Bottom*100));
     pt->AddText(Form("Walls/Bottom = %f %%", Walls_over_Bottom*100));
     
@@ -105,7 +105,7 @@ void photon_statistics( TString file_name ) {
     Int_t phNumber;     tree->SetBranchAddress("phNumber", &phNumber);
     
     Int_t nEntries = tree->GetEntries();
-    Int_t nEvents = 1000;
+    Int_t nEvents = 100;
     Int_t maxPh[nEvents];
     
     for( Int_t iEvent=0; iEvent<nEvents; ++iEvent ) {
@@ -130,14 +130,16 @@ void photon_statistics( TString file_name ) {
     TCanvas* c = new TCanvas("c","",1500,750);
     TAxis* Xaxis = phDistribution->GetXaxis();
     Xaxis->SetTitle("Event Number");
+    Xaxis->SetTitleSize(0.05);
     Xaxis->CenterTitle();
     TAxis* Yaxis = phDistribution->GetYaxis();
     Yaxis->SetTitle("Number of photons");
+    Yaxis->SetTitleSize(0.05);
     Yaxis->CenterTitle();
     
-    TPaveText* pt = new TPaveText(0.72,0.85,0.92,0.95,"NB" "NDC");
+    TPaveText* pt = new TPaveText(0.3171806,0.8537666,0.6819383,0.9542097,"NB" "NDC");
     pt->SetTextFont(42);
-    pt->SetTextSize(0.032);
+    pt->SetTextSize(0.07);
     pt->AddText(Form("Mean = %f ", sum*1.0/nEvents));
     
     phDistribution->SetStats(0);
