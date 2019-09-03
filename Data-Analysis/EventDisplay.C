@@ -65,7 +65,7 @@ void EventDisplay(Int_t RunNumber) {
 		for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
 			PmtTime_Histo[iChannel]->Fill(Ev.PmtSignal.Time[iChannel]);
 			PmtPulseHeight_Histo[iChannel]->Fill(Ev.PmtSignal.PulseHeight[iChannel]);
-			if(Ev.PmtSignal.Time[iChannel]>=150 && Ev.PmtSignal.Time[iChannel]<=200 ) {
+			if(Ev.PmtSignal.Time[iChannel]>=80 && Ev.PmtSignal.Time[iChannel]<=130 ) {
 				if(Ev.PmtSignal.PulseHeight[iChannel]>=200) {
 					cout << "ch " << Ev.PmtSignal.ChannelID[iChannel] << " evNumber " << evNumber << endl;
 				}

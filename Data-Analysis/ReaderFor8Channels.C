@@ -43,12 +43,19 @@ const Int_t activeChannels[nChannelsPmt] = {21,22,29,30,37,38,45,46}; //copy the
 typedef struct {
 	Double_t xHit[nSiLayers];
 	Double_t yHit[nSiLayers];
+	Double_t z_xHit[nSiLayers];
+	Double_t z_yHit[nSiLayers];
+	Double_t theta;
+	Double_t phi;
 } Si_t;
 
 typedef struct {
 	Int_t    ChannelID[nChannelsPmt];
 	Double_t PulseHeight[nChannelsPmt];
 	Double_t Time[nChannelsPmt];
+	Double_t xRadiator;
+	Double_t yRadiator;
+	Double_t zRadiator;
 } Pmt_t;
 
 typedef struct {
@@ -70,10 +77,18 @@ void ReadEvent( Int_t SiRunNumber, bool debug=false ) {
 	Int_t evNumber=0;     				tree->Branch("evNumber",&evNumber,"evNumber/I");
 	s = Form("xHit[%i]/D",nSiLayers); 		tree->Branch("xHit",Ev.SiHit.xHit,s);
 	s = Form("yHit[%i]/D",nSiLayers); 		tree->Branch("yHit",Ev.SiHit.yHit,s);
+	s = Form("z_xHit[%i]/D",nSiLayers); 		tree->Branch("z_xHit",Ev.SiHit.z_xHit,s);
+	s = Form("z_yHit[%i]/D",nSiLayers); 		tree->Branch("z_yHit",Ev.SiHit.z_yHit,s);
+							tree->Branch("phi",&Ev.SiHit.phi,"phi/D");
+							tree->Branch("theta",&Ev.SiHit.theta,"theta/D");
 	s = Form("PmtChannelID[%i]/I",nChannelsPmt);	tree->Branch("PmtChannelID",Ev.PmtSignal.ChannelID,s);
 	s = Form("PmtPulseHeight[%i]/D",nChannelsPmt);  tree->Branch("PmtPulseHeight",Ev.PmtSignal.PulseHeight,s);
 	s = Form("PmtTime[%i]/D",nChannelsPmt);         tree->Branch("PmtTime",Ev.PmtSignal.Time,s);
-	//TODO add scintillators if necessary
+							tree->Branch("xRadiator",&Ev.PmtSignal.xRadiator,"xRadiator/D");
+							tree->Branch("yRadiator",&Ev.PmtSignal.yRadiator,"yRadiator/D");
+							tree->Branch("zRadiator",&Ev.PmtSignal.zRadiator,"zRadiator/D");
+	//TODO add scintillators 
+	
 	ifstream file_ascii(Form("run%i.dat",SiRunNumber));
 	Int_t evCounter=0;	
 	Int_t nRecord=0;
@@ -106,8 +121,17 @@ void fillEvent( Ev_t &Ev, Double_t* vRecord ) {
 	Ssiz_t it=0;
 	Ev.SiHit.xHit[0]=vRecord[it++];
 	Ev.SiHit.yHit[0]=vRecord[it++];
+	Ev.SiHit.z_xHit[0]= 9.00; //FIXME
+	Ev.SiHit.z_yHit[0]= 10.5; //FIXME
 	Ev.SiHit.xHit[1]=vRecord[it++];
 	Ev.SiHit.yHit[1]=vRecord[it++];
+	Ev.SiHit.z_xHit[1]= 19.2; //FIXME
+	Ev.SiHit.z_yHit[1]= 20.7; //FIXME
+	
+	Ev.Ev.PmtSignal.zRadiator= 30.0; //FIXME questa è proprio a caso 
+	
+	//TODO add function to calculate x,y projections and polar angles
+
 	it+=8;
 	for(Int_t i=0; i<nChannelsPmt; ++i) {
 		Ev.PmtSignal.PulseHeight[i]=vRecord[it++];
