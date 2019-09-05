@@ -7,9 +7,9 @@ void ProduceArrays(TString file_name, Int_t event_number) {
     	Int_t evNumber;     tree->SetBranchAddress("evNumber",&evNumber);
     	Int_t id;           tree->SetBranchAddress("id",&id);
     	Int_t phNumber;	    tree->SetBranchAddress("phNumber",&phNumber); 
-	Double_t x[168];    tree->SetBranchAddress("x",x);
-	Double_t y[168];    tree->SetBranchAddress("y",y);
-	Double_t z[168];    tree->SetBranchAddress("z",z);
+	Double_t x[10000];    tree->SetBranchAddress("x",x);
+	Double_t y[10000];    tree->SetBranchAddress("y",y);
+	Double_t z[10000];    tree->SetBranchAddress("z",z);
 	
 	Int_t nEntries = tree->GetEntries();
     	
@@ -22,16 +22,16 @@ void ProduceArrays(TString file_name, Int_t event_number) {
     	
     	for(Int_t iEntry=0; iEntry<nEntries; ++iEntry) {
         	tree->GetEntry(iEntry); //each entry is a particle
-        	for(Int_t i=0; i<168; ++i) {
-        		if(id==22 && evNumber==event_number && x[i]>-999 && z[i]<=1){
+        	for(Int_t i=0; i<10000; ++i) {
+        		if(id==22 && evNumber==event_number && x[i]>-999 && z[i]<=100){
         			fx_ph << x[i] << endl;
         			fy_ph << y[i] << endl;
-        			fz_ph << -z[i]+1. << endl;
+        			fz_ph << -z[i]+8. << endl;
         		}
         		if(id==13 && evNumber==event_number && x[i]>-999 && i!=0){
             			fx_mu << x[i] << endl;
         			fy_mu << y[i] << endl;
-        			fz_mu << -z[i]+1. << endl;
+        			fz_mu << -z[i]+8. << endl;
         		}
         	}
     	}

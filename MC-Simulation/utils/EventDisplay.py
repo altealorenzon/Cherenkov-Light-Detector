@@ -9,9 +9,9 @@ ax = fig.add_subplot(111, projection='3d')
 origin = np.array([0, 0, 0])
 
 #radius
-R = 1
+R = 2.5
 #vector in direction of axis
-v = np.array([0, 0, 1])
+v = np.array([0, 0, 8])
 #find magnitude of vector
 mag = norm(v)
 #unit vector in direction of axis
@@ -24,9 +24,9 @@ n1 = np.cross(v, not_v)
 n1 /= norm(n1)
 #make unit vector perpendicular to v and n1
 n2 = np.cross(v, n1)
-#surface ranges over t from 0 to length of axis and 0 to 2*pi
+#surface ranges over t from 0 to length of axis and 0 to pi
 t = np.linspace(0, mag, 100)
-theta = np.linspace(0, 1 * np.pi, 100)
+theta = np.linspace(0, np.pi, 100)
 #use meshgrid to make 2d arrays
 t, theta = np.meshgrid(t, theta)
 #generate coordinates for surface
@@ -43,19 +43,20 @@ ph_ydata = np.loadtxt("ph_y.txt")
 ph_zdata = np.loadtxt("ph_z.txt")
 ph = ax.scatter3D(ph_xdata, ph_ydata, ph_zdata, s=2, c=ph_zdata, cmap=cm.Greens);
 #space axis
-ax.set_xlim(-1.1, 1.1)
-ax.set_ylim(-1.1, 1.1)
-ax.set_zlim(0, 1.1)
+ax.set_xlim(-2.6, 2.6)
+ax.set_ylim(-2.6, 2.6)
+ax.set_zlim(0, 8.1)
 ax.set_xlabel('x [cm]')
 ax.set_ylabel('y [cm]')
 ax.set_zlabel('z [cm]')
-ax_ticks = ([-1., -0.5, 0., 0.5, 1.])
+ax_ticks = ([-2., -1., 0., 1., 2.])
 ax.set_xticks(ax_ticks)
 ax.set_yticks(ax_ticks)
 #color barsticks=[-1, 0, 1]
-mu_cbar = fig.colorbar(mu, ticks=[0.2, 0.4, 0.6, 0.8], shrink=0.8)
-ph_cbar = fig.colorbar(ph, ticks=[0.2, 0.4, 0.6, 0.8], shrink=0.8)
-mu_cbar.ax.set_ylabel('z coordinate of muon [cm]')
+#mu_cbar = fig.colorbar(mu, ticks=[1, 2, 3, 4, 5, 6, 7], shrink=0.8)
+ph_cbar = fig.colorbar(ph, ticks=[1, 2, 3, 4, 5, 6, 7], shrink=0.8)
+#mu_cbar.ax.set_ylabel('z coordinate of muon [cm]')
 ph_cbar.ax.set_ylabel('z coordinate of photons [cm]')
 
-plt.show()
+#plt.show()
+plt.savefig('79_EventDisplay.png')

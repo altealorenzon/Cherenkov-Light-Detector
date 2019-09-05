@@ -11,11 +11,11 @@ Setup::Setup( std::string type, std::string ref ): type_of_detector( type ), ref
     //Here you can set your detector's parameters   
     n = 1.4; //refraction index
     d = 100;   //cm distance of the trigger scintillators
-    PMdistance = 0.6; //cm distance of PM plane from radiator
+    PMdistance = 0.3; //cm distance of PM plane from radiator
     
     if( type_of_detector == "c" ) {
-        r = 1.0;  //cm radius
-        h = 1.0; //cm height
+        r = 1;  //cm radius
+        h = 1; //cm height
     }
     else if ( type_of_detector == "p" ) {
         r = 6.0; //cm square basis dimension
