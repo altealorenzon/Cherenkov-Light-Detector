@@ -7,6 +7,7 @@ Data-Analysis/ascii/*
 Data-Analysis/*.dat
 Data-Analysis/*.root
 Data-Analysis/*.txt
+Data-Analysis/*.pdf
 Data-Analysis/treeSiliconBig.C
 MC-Simulation/utils/*.txt
 MC-Simulation/utils/*.png
