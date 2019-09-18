@@ -174,14 +174,14 @@ void fillEvent( Ev_t &Ev, Double_t* vRecord ) {
 	Ssiz_t it=0;
 	Ev.SiHit.xHit[0]=vRecord[it++];
 	Ev.SiHit.yHit[0]=vRecord[it++];
-	Ev.SiHit.z_xHit[0]= 9.00; //FIXME
-	Ev.SiHit.z_yHit[0]= 10.5; //FIXME
+	Ev.SiHit.z_xHit[0]= 9.00; 
+	Ev.SiHit.z_yHit[0]= 10.5; 
 	Ev.SiHit.xHit[1]=vRecord[it++];
 	Ev.SiHit.yHit[1]=vRecord[it++];
-	Ev.SiHit.z_xHit[1]= 19.2; //FIXME
-	Ev.SiHit.z_yHit[1]= 20.7; //FIXME
+	Ev.SiHit.z_xHit[1]= 21.05;
+	Ev.SiHit.z_yHit[1]= 19.55;
 	
-	Ev.PmtSignal.zRadiator= 30.0; //FIXME questa è proprio a caso 
+	Ev.PmtSignal.zRadiator= 41.55;  
 	
 	//Function to calculate x,y projections and polar angles
 	projRad(Ev);
@@ -200,7 +200,7 @@ void fillEvent( Ev_t &Ev, Double_t* vRecord ) {
         		return;
 		}
 		for(Int_t i=0; i<nChannelsPmt; ++i) {
-			Ev.PmtSignal.DgtzID[i]=;
+			Ev.PmtSignal.DgtzID[i]=20;
 			Ev.PmtSignal.ChannelID[i]=activeChannels[i];
 		}
 	} else if(nChannelsPmt==26) {
@@ -226,9 +226,9 @@ void fillEvent( Ev_t &Ev, Double_t* vRecord ) {
         		return;
 		}
 		for(Int_t i=0; i<nChannelsPmt; ++i) {
-			if(i<8) Ev.PmtSignal.DgtzID[i]=;
-			if(i>=8&&i<24) Ev.PmtSignal.DgtzID[i]=;
-			if(i>=24) Ev.PmtSignal.DgtzID[i]=;
+			if(i<8) Ev.PmtSignal.DgtzID[i]=20;
+			if(i>=8&&i<24) Ev.PmtSignal.DgtzID[i]=31;
+			if(i>=24) Ev.PmtSignal.DgtzID[i]=25;
 			Ev.PmtSignal.ChannelID[i]=activeChannels[i];
 		}
 	}
