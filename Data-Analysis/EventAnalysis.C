@@ -58,26 +58,30 @@
 using namespace std;
 
 const Int_t nSiLayers = 2;
-const Int_t nChannelsPmt = 8; // or 26
+const Int_t nChannelsPmt = 26; // or 26
 const Int_t activeChannels[26] = {21,22,29,30,37,38,45,46,5,6,13,14,53,54,61,62,40,39,32,31,24,23,16,15,7,8};
 //(x,y) bin numbers corresponding to the active channels of the Pmt
 //			21 22 29 30 37 38 45 46  5  6 13 14 53 54 61 62 40 39 32 31 24 23 16 15  7  8
 const Int_t xBin[26] = { 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 8, 7, 8, 7, 8, 7, 8, 7, 7, 8};
 const Int_t yBin[26] = { 6, 6, 5, 5, 4, 4, 3, 3, 8, 8, 7, 7, 2, 2, 1, 1, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8};
 
-//here you can set the time window
-const Int_t timeWindow_lowerBound = 80;
-const Int_t timeWindow_upperBound = 120;
-
 typedef struct {
 	Double_t xHit[nSiLayers];
 	Double_t yHit[nSiLayers];
+	Double_t z_xHit[nSiLayers];
+	Double_t z_yHit[nSiLayers];
+	Double_t theta; //Be careful: it's a cos
+        Double_t phi;   //Be careful: it's a cos
 } Si_t;
 
 typedef struct {
+	Int_t    DgtzID[nChannelsPmt];
 	Int_t    ChannelID[nChannelsPmt];
 	Double_t PulseHeight[nChannelsPmt];
 	Double_t Time[nChannelsPmt];
+	Double_t xRadiator;
+	Double_t yRadiator;
+	Double_t zRadiator;
 } Pmt_t;
 
 typedef struct {
@@ -119,8 +123,11 @@ void RunStatsPmt(Int_t SiRunNumber) {
 	intree->SetBranchAddress("PmtTime",Ev.PmtSignal.Time);
 	intree->SetBranchAddress("PmtPulseHeight",Ev.PmtSignal.PulseHeight);
 	intree->SetBranchAddress("PmtChannelID",Ev.PmtSignal.ChannelID);
+	intree->SetBranchAddress("DgtzID",Ev.PmtSignal.DgtzID);
 	
 	Int_t nEntries = intree->GetEntries();
+	Int_t timeWindow_lowerBound;
+	Int_t timeWindow_upperBound;
 	
 	for(Int_t iEntry=0; iEntry<nEntries; ++iEntry) {
 		intree->GetEntry(iEntry);
@@ -128,7 +135,15 @@ void RunStatsPmt(Int_t SiRunNumber) {
 		for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
 			PmtTime_Histo[iChannel]->Fill(Ev.PmtSignal.Time[iChannel]);
 			PmtPulseHeight_Histo[iChannel]->Fill(Ev.PmtSignal.PulseHeight[iChannel]);
-			if(Ev.PmtSignal.Time[iChannel]>=timeWindow_lowerBound && Ev.PmtSignal.Time[iChannel]<=timeWindow_upperBound ) {
+			if(Ev.PmtSignal.DgtzID[iChannel]!=31) {
+				timeWindow_lowerBound=80;
+				timeWindow_upperBound=120;
+			} else if(Ev.PmtSignal.DgtzID[iChannel]==31) {
+				cout << "Dgtz " << Ev.PmtSignal.DgtzID[iChannel] << endl;
+				timeWindow_lowerBound=190;
+				timeWindow_upperBound=230;
+			}
+			if(Ev.PmtSignal.Time[iChannel]>=timeWindow_lowerBound && Ev.PmtSignal.Time[iChannel]<=timeWindow_upperBound) {
 				PmtPulseHeight_HistoInTime[iChannel]->Fill(Ev.PmtSignal.PulseHeight[iChannel]);
 				if(Ev.PmtSignal.PulseHeight[iChannel]>=150) ++chCounter;
 			}
@@ -140,14 +155,25 @@ void RunStatsPmt(Int_t SiRunNumber) {
 	TLine* line_upperBound[nChannelsPmt];
 	
 	TCanvas* c_time = new TCanvas("c_time","",1500,750);
-	Int_t nLines=2;
-	if(nChannelsPmt==26) nLines=4;
-	c_time->Divide(nChannelsPmt/2,nLines);
+	Int_t nRows=2;
+	Int_t nColumns=4;
+	if(nChannelsPmt==26) {
+		nRows=4;
+		nColumns=7;
+	}
+	c_time->Divide(nColumns,nRows);
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
 		c_time->cd(iChannel+1);
 		PmtTime_Histo[iChannel]->SetStats(0);
 		//PmtTime_Histo[iChannel]->GetXaxis()->SetTitle("Time [a.u.]");
 		PmtTime_Histo[iChannel]->Draw();
+		if(iChannel>=8&&iChannel<24) {
+			timeWindow_lowerBound=190;
+			timeWindow_upperBound=230;
+		} else {
+			timeWindow_lowerBound=80;
+			timeWindow_upperBound=120;
+		}
 		line_lowerBound[iChannel] = new TLine(timeWindow_lowerBound,0,timeWindow_lowerBound,PmtTime_Histo[iChannel]->GetBinContent(PmtTime_Histo[iChannel]->GetMaximumBin()));
 		line_lowerBound[iChannel]->SetLineColor(kBlack);
 		line_lowerBound[iChannel]->Draw("SAME");
@@ -158,7 +184,7 @@ void RunStatsPmt(Int_t SiRunNumber) {
 	
 	TCanvas* c_ph = new TCanvas("c_ph","",1500,750);
 	TPaveText* pt[nChannelsPmt];
-	c_ph->Divide(nChannelsPmt/2,nLines);
+	c_ph->Divide(nColumns,nRows);
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
 		c_ph->cd(iChannel+1);
 		//c_ph->cd(iChannel+1)->SetLogy();
@@ -198,7 +224,8 @@ void xyrad_histo(Int_t SiRunNumber,
 	Double_t xRadiator, yRadiator, theta;
 	Double_t xHit[nSiLayers], yHit[nSiLayers];
 	Double_t PmtTime[nChannelsPmt];
-	 
+	Int_t DgtzID[nChannelsPmt];
+	intree->SetBranchAddress("DgtzID",DgtzID);
 	intree->SetBranchAddress("PmtTime",PmtTime);
 	intree->SetBranchAddress("xRadiator", &xRadiator);  TH1F* h_xRadiator = new TH1F("h_xRadiator", "xRadiator", 50, 0, 10);
   	intree->SetBranchAddress("yRadiator", &yRadiator);  TH1F* h_yRadiator = new TH1F("h_yRadiator", "yRadiator", 50, 0, 10);
@@ -213,7 +240,9 @@ void xyrad_histo(Int_t SiRunNumber,
   	intree->SetBranchAddress("theta", &theta);          TH1F* h_theta = new TH1F("h_theta", "theta", 10, thr_theta, 1);
   	
   	vector<Int_t> selectedEvents;
-  	
+  	Int_t timeWindow_lowerBound;
+	Int_t timeWindow_upperBound;
+	
   	for (Int_t i = 0; i < intree->GetEntries(); ++i) {
 		intree->GetEntry(i);
     		h_x0Hit->Fill(xHit[0]);
@@ -224,6 +253,13 @@ void xyrad_histo(Int_t SiRunNumber,
     		Int_t nChannelsInTime = 0;
     		
 		for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
+			if(DgtzID[iChannel]!=31) {
+				timeWindow_lowerBound=80;
+				timeWindow_upperBound=120;
+			} else if(DgtzID[iChannel]==31) {
+				timeWindow_lowerBound=190;
+				timeWindow_upperBound=230;
+			}
 			if( PmtTime[iChannel]>=timeWindow_lowerBound &&PmtTime[iChannel]<=timeWindow_upperBound ) nChannelsInTime += 1;
 			//If all signals are in time then AllSignalsInTime is = number of PMT channels
 		}
