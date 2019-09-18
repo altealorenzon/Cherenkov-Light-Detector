@@ -86,8 +86,8 @@
 using namespace std;
 
 const Int_t nSiLayers = 2;
-const Int_t nChannelsPmt = 8; //or 26
-const Int_t nTokensInRecord = 39; // 39 for 8 channels - 71 for 26 channels
+const Int_t nChannelsPmt = 26; //or 26
+const Int_t nTokensInRecord = 71; // 39 for 8 channels - 71 for 26 channels
 const Int_t activeChannels[26] = {21,22,29,30,37,38,45,46,5,6,13,14,53,54,61,62,40,39,32,31,24,23,16,15,7,8};
 
 typedef struct {
@@ -100,6 +100,7 @@ typedef struct {
 } Si_t;
 
 typedef struct {
+	Int_t    DgtzID[nChannelsPmt];
 	Int_t    ChannelID[nChannelsPmt];
 	Double_t PulseHeight[nChannelsPmt];
 	Double_t Time[nChannelsPmt];
@@ -132,6 +133,7 @@ void ReadEvent( Int_t SiRunNumber, bool debug=false ) {
 	s = Form("z_yHit[%i]/D",nSiLayers); 		tree->Branch("z_yHit",Ev.SiHit.z_yHit,s);
 							tree->Branch("phi",&Ev.SiHit.phi,"phi/D");
 							tree->Branch("theta",&Ev.SiHit.theta,"theta/D");
+	s = Form("DgtzID[%i]/I",nChannelsPmt);		tree->Branch("DgtzID",Ev.PmtSignal.DgtzID,s);
 	s = Form("PmtChannelID[%i]/I",nChannelsPmt);	tree->Branch("PmtChannelID",Ev.PmtSignal.ChannelID,s);
 	s = Form("PmtPulseHeight[%i]/D",nChannelsPmt);  tree->Branch("PmtPulseHeight",Ev.PmtSignal.PulseHeight,s);
 	s = Form("PmtTime[%i]/D",nChannelsPmt);         tree->Branch("PmtTime",Ev.PmtSignal.Time,s);
@@ -198,6 +200,7 @@ void fillEvent( Ev_t &Ev, Double_t* vRecord ) {
         		return;
 		}
 		for(Int_t i=0; i<nChannelsPmt; ++i) {
+			Ev.PmtSignal.DgtzID[i]=;
 			Ev.PmtSignal.ChannelID[i]=activeChannels[i];
 		}
 	} else if(nChannelsPmt==26) {
@@ -223,6 +226,9 @@ void fillEvent( Ev_t &Ev, Double_t* vRecord ) {
         		return;
 		}
 		for(Int_t i=0; i<nChannelsPmt; ++i) {
+			if(i<8) Ev.PmtSignal.DgtzID[i]=;
+			if(i>=8&&i<24) Ev.PmtSignal.DgtzID[i]=;
+			if(i>=24) Ev.PmtSignal.DgtzID[i]=;
 			Ev.PmtSignal.ChannelID[i]=activeChannels[i];
 		}
 	}
