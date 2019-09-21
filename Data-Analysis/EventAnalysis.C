@@ -101,6 +101,17 @@ void RunStatsPmt(Int_t SiRunNumber) {
   	if(infile->IsOpen()) printf("File opened successfully\n");
 	TTree* intree = (TTree*)infile->Get("Cherenkov");
 	
+	Int_t nEntries = intree->GetEntries();
+	cout << "Total number of events: " << nEntries << endl;
+	
+	Ev_t Ev;
+	Int_t evNumber;     				
+	intree->SetBranchAddress("evNumber",&evNumber);
+	intree->SetBranchAddress("PmtTime",Ev.PmtSignal.Time);
+	intree->SetBranchAddress("PmtPulseHeight",Ev.PmtSignal.PulseHeight);
+	intree->SetBranchAddress("PmtChannelID",Ev.PmtSignal.ChannelID);
+	intree->SetBranchAddress("DgtzID",Ev.PmtSignal.DgtzID);
+	
 	TH1F* PmtTime_Histo[nChannelsPmt];
 	TH1F* PmtPulseHeight_Histo[nChannelsPmt];
 	TH1F* PmtPulseHeight_HistoInTime[nChannelsPmt];
@@ -117,16 +128,6 @@ void RunStatsPmt(Int_t SiRunNumber) {
 		PmtPulseHeight_HistoInTime[iChannel]->SetFillColor(kRed-7);
 	}
 	
-	Ev_t Ev;
-	Int_t evNumber;     				
-	intree->SetBranchAddress("evNumber",&evNumber);
-	intree->SetBranchAddress("PmtTime",Ev.PmtSignal.Time);
-	intree->SetBranchAddress("PmtPulseHeight",Ev.PmtSignal.PulseHeight);
-	intree->SetBranchAddress("PmtChannelID",Ev.PmtSignal.ChannelID);
-	intree->SetBranchAddress("DgtzID",Ev.PmtSignal.DgtzID);
-	
-	Int_t nEntries = intree->GetEntries();
-	cout << "Total number of events: " << nEntries << endl;
 	
 	Int_t timeWindow_lowerBound;
 	Int_t timeWindow_upperBound;
@@ -240,33 +241,59 @@ void RunStatsPmt(Int_t SiRunNumber) {
 // Select events by cutting on track direction and hits positions 
 void xyrad_histo(Int_t SiRunNumber,
 		 Double_t thr_theta,
-		 Double_t thr_xRadiator,
-		 Double_t thr_yRadiator,
+		 Double_t thr_Radiator,
 		 Double_t thr_x0,
 		 Double_t thr_y0) {
 
 	TString infile_name = Form("run%i.root",SiRunNumber);
 	TFile* infile = new TFile(infile_name, "READ");
   	if(infile->IsOpen()) printf("File opened successfully\n");
-  
-	TTree* intree = (TTree*)infile->Get("Cherenkov");
+  	TTree* intree = (TTree*)infile->Get("Cherenkov");
+  	
+  	TH1F* xRadiator_Histo = new TH1F("xRadiator_Histo", "x of Radiator", 50, 0, 10);
+  	TH1F* yRadiator_Histo = new TH1F("yRadiator_Histo", "y of Radiator", 50, 0, 10);
+  	TH1F* xRadiator_HistoInRange = new TH1F("xRadiator_HistoInRange", "", 50, 0, 10);
+  	TH1F* yRadiator_HistoInRange = new TH1F("yRadiator_HistoInRange", "", 50, 0, 10);
+  	TH1F* xRadiator_HistoInSpacialRange = new TH1F("xRadiator_HistoInSpacialRange", "", 50, 0, 10);
+  	TH1F* yRadiator_HistoInSpacialRange = new TH1F("yRadiator_HistoInSpacialRange", "", 50, 0, 10);
+  	TH1F* xRadiator_HistoInAngularRange = new TH1F("xRadiator_HistoInAngularRange", "", 50, 0, 10);
+  	TH1F* yRadiator_HistoInAngularRange = new TH1F("yRadiator_HistoInAngularRange", "", 50, 0, 10);
+  	TH2F* xyRadiator_Histo = new TH2F("xyRadiator_Histo", "Before cuts", 50, 0, 10, 50, 0, 10);
+  	TH2F* xyRadiator_HistoInRange = new TH2F("xyRadiator_HistoInRange", "After cuts", 50, 0, 10, 50, 0, 10);
+  	TH1F* x0Hit_Histo = new TH1F("x0Hit_Histo", "x Hit of UPPER Si", 50, 0, 10);
+  	TH1F* x1Hit_Histo = new TH1F("x1Hit_Histo", "x Hit of LOWER Si", 50, 0, 10);
+  	TH1F* y0Hit_Histo = new TH1F("y0Hit_Histo", "y Hit of UPPER Si", 50, 0, 10);
+  	TH1F* y1Hit_Histo = new TH1F("y1Hit_Histo", "y Hit of LOWER Si", 50, 0, 10);
+  	TH1F* x0Hit_HistoInRange = new TH1F("x0Hit_HistoInRange", "", 50, 0, 10);
+  	TH1F* x1Hit_HistoInRange = new TH1F("x1Hit_HistoInRange", "", 50, 0, 10);
+  	TH1F* y0Hit_HistoInRange = new TH1F("y0Hit_HistoInRange", "", 50, 0, 10);
+  	TH1F* y1Hit_HistoInRange = new TH1F("y1Hit_HistoInRange", "", 50, 0, 10);
+  	TH1F* x0Hit_HistoInAngularRange = new TH1F("x0Hit_HistoInAngularRange", "", 50, 0, 10);
+  	TH1F* x1Hit_HistoInAngularRange = new TH1F("x1Hit_HistoInAngularRange", "", 50, 0, 10);
+  	TH1F* y0Hit_HistoInAngularRange = new TH1F("y0Hit_HistoInAngularRange", "", 50, 0, 10);
+  	TH1F* y1Hit_HistoInAngularRange = new TH1F("y1Hit_HistoInAngularRange", "", 50, 0, 10);
+  	TH1F* x0Hit_HistoInSpacialRange = new TH1F("x0Hit_HistoInSpacialRange", "", 50, 0, 10);
+  	TH1F* x1Hit_HistoInSpacialRange = new TH1F("x1Hit_HistoInSpacialRange", "", 50, 0, 10);
+  	TH1F* y0Hit_HistoInSpacialRange = new TH1F("y0Hit_HistoInSpacialRange", "", 50, 0, 10);
+  	TH1F* y1Hit_HistoInSpacialRange = new TH1F("y1Hit_HistoInSpacialRange", "", 50, 0, 10);
+  	TH2F* xy0_Histo = new TH2F("xy0_Histo", "UPPER Si, before cuts", 50, 0, 10, 50, 0, 10);
+  	TH2F* xy1_Histo = new TH2F("xy1_Histo", "LOWER Si, before cuts", 50, 0, 10, 50, 0, 10);
+  	TH2F* xy0_HistoInRange = new TH2F("xy0_HistoInRange", "UPPER Si, after cuts", 50, 0, 10, 50, 0, 10);
+  	TH2F* xy1_HistoInRange = new TH2F("xy1_HistoInRange", "LOWER Si, after cuts", 50, 0, 10, 50, 0, 10);
+  	TH1F* theta_Histo = new TH1F("theta_Histo", "cos(#theta)", 50, 0.9, 1);
+  	TH1F* theta_HistoInAngularRange = new TH1F("theta_HistoInAngularRange", "", 50, 0.9, 1);
+  	
 	Double_t xRadiator, yRadiator, theta;
 	Double_t xHit[nSiLayers], yHit[nSiLayers];
 	Double_t PmtTime[nChannelsPmt];
 	Int_t DgtzID[nChannelsPmt];
 	intree->SetBranchAddress("DgtzID",DgtzID);
 	intree->SetBranchAddress("PmtTime",PmtTime);
-	intree->SetBranchAddress("xRadiator", &xRadiator);  TH1F* h_xRadiator = new TH1F("h_xRadiator", "xRadiator", 50, 0, 10);
-  	intree->SetBranchAddress("yRadiator", &yRadiator);  TH1F* h_yRadiator = new TH1F("h_yRadiator", "yRadiator", 50, 0, 10);
-                                                      	    TH2F* h_xyRadiator = new TH2F("h_xyRadiator", "xyRadiator", 50, 0, 10, 50, 0, 10);
-
-	intree->SetBranchAddress("xHit", xHit);             TH1F* h_x0Hit = new TH1F("h_x0Hit", "x0Hit", 50, 0, 10);
-                          	                            TH1F* h_x1Hit = new TH1F("h_x1Hit", "x1Hit", 50, 0, 10);
-
-  	intree->SetBranchAddress("yHit", yHit);             TH1F* h_y0Hit = new TH1F("h_y0Hit", "y0Hit", 50, 0, 10);
-        	                                            TH1F* h_y1Hit = new TH1F("h_y1Hit", "y1Hit", 50, 0, 10);
-
-  	intree->SetBranchAddress("theta", &theta);          TH1F* h_theta = new TH1F("h_theta", "theta", 10, thr_theta, 1);
+	intree->SetBranchAddress("xRadiator", &xRadiator);  
+  	intree->SetBranchAddress("yRadiator", &yRadiator);  
+        intree->SetBranchAddress("xHit", xHit);             
+        intree->SetBranchAddress("yHit", yHit);             
+    	intree->SetBranchAddress("theta", &theta);          
   	
   	vector<Int_t> selectedEvents;
   	Int_t timeWindow_lowerBound;
@@ -274,11 +301,6 @@ void xyrad_histo(Int_t SiRunNumber,
 	
   	for (Int_t i = 0; i < intree->GetEntries(); ++i) {
 		intree->GetEntry(i);
-    		h_x0Hit->Fill(xHit[0]);
-    		h_x1Hit->Fill(xHit[1]);
-    		h_y0Hit->Fill(yHit[0]);
-    		h_y1Hit->Fill(yHit[1]);
-    		
     		Int_t nChannelsInTime = 0;
     		
 		for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
@@ -294,56 +316,159 @@ void xyrad_histo(Int_t SiRunNumber,
 		}
 		// CUT on time of PMT signal 
     		if( nChannelsInTime==nChannelsPmt ) {
+    			x0Hit_Histo->Fill(xHit[0]);
+    			x1Hit_Histo->Fill(xHit[1]);
+    			y0Hit_Histo->Fill(yHit[0]);
+    			y1Hit_Histo->Fill(yHit[1]);	
+    			xy0_Histo->Fill(xHit[0],yHit[0]);
+    			xy1_Histo->Fill(xHit[1],yHit[1]);
+    			xRadiator_Histo->Fill(xRadiator);
+    			yRadiator_Histo->Fill(yRadiator);
+    			xyRadiator_Histo->Fill(xRadiator,yRadiator);
+    			theta_Histo->Fill(theta);
     			// CUT on tracks direction
     			if (theta > thr_theta) {
-    				// CUT on spacial distribution of hits
-    				if ( abs(5 - xRadiator) < thr_xRadiator && abs(5.96 - yRadiator) < thr_yRadiator &&
-	   		             abs(5 - xHit[0]) < thr_x0 && abs(5 - yHit[0]) < thr_y0 ) {
-	   				h_xyRadiator->Fill(yRadiator, xRadiator);
-	   				h_xRadiator->Fill(xRadiator);
-	   				h_yRadiator->Fill(yRadiator);
-	   				h_theta->Fill(theta);
-	   				selectedEvents.push_back(i+1);
-				}
+    				x0Hit_HistoInAngularRange->Fill(xHit[0]);
+    				x1Hit_HistoInAngularRange->Fill(xHit[1]);
+    				y0Hit_HistoInAngularRange->Fill(yHit[0]);
+    				y1Hit_HistoInAngularRange->Fill(yHit[1]);
+    				xRadiator_HistoInAngularRange->Fill(xRadiator);
+    				yRadiator_HistoInAngularRange->Fill(yRadiator);
+    				theta_HistoInAngularRange->Fill(theta);
+    			}
+    			// CUT on spacial distribution of hits
+    			if ( (pow((5 - xRadiator),2)+pow((5.96 - yRadiator),2))<=pow(thr_Radiator,2) && abs(5 - xHit[0])<thr_x0 && abs(5 - yHit[0])<thr_y0 ) {
+	   		     	x0Hit_HistoInSpacialRange->Fill(xHit[0]);
+    				x1Hit_HistoInSpacialRange->Fill(xHit[1]);
+    				y0Hit_HistoInSpacialRange->Fill(yHit[0]);
+    				y1Hit_HistoInSpacialRange->Fill(yHit[1]);
+	   			xRadiator_HistoInSpacialRange->Fill(xRadiator);
+	   			yRadiator_HistoInSpacialRange->Fill(yRadiator);
+			}
+    			// CUT on track direction & spacial distribution of hits
+    			if (theta > thr_theta && (pow((5 - xRadiator),2)+pow((5.96 - yRadiator),2))<=pow(thr_Radiator,2) && abs(5 - xHit[0]) < thr_x0 && abs(5 - yHit[0]) < thr_y0 ) {
+	   			x0Hit_HistoInRange->Fill(xHit[0]);
+    				x1Hit_HistoInRange->Fill(xHit[1]);
+    				y0Hit_HistoInRange->Fill(yHit[0]);
+    				y1Hit_HistoInRange->Fill(yHit[1]);
+    				xy0_HistoInRange->Fill(xHit[0],yHit[0]);
+    				xy1_HistoInRange->Fill(xHit[1],yHit[1]);
+	   			xRadiator_HistoInRange->Fill(xRadiator);
+	   			yRadiator_HistoInRange->Fill(yRadiator);
+	   			xyRadiator_HistoInRange->Fill(yRadiator,xRadiator);
+	   			selectedEvents.push_back(i+1);
 			}
 		}
 	}
 	
 	cout << "Selected events = " << selectedEvents.size() << endl;
-	ofstream selectedEvents_fout(Form("run%i_selectedEvents_thetaThr%1.1f_xRadiatorThr%1.1f_xUpperSiThr%1.1f.txt",
-					   SiRunNumber,thr_theta,thr_xRadiator,thr_x0));
+	ofstream selectedEvents_fout(Form("run%i_selectedEvents_thetaThr%1.1f_RadiatorThr%1.1f_xUpperSiThr%1.1f.txt",
+					   SiRunNumber,thr_theta,thr_Radiator,thr_x0));
 	
 	for(Int_t iEv=0; iEv<selectedEvents.size(); ++iEv) {
 		selectedEvents_fout << selectedEvents[iEv] << endl;
 	}
-		
+	
+	gStyle->SetPalette(kCherry);
+	TColor::InvertPalette();
 	//In this Canvas I plot the distribution of the muons on the xy plane of the radiator provided some filters
-  	TCanvas* c = new TCanvas();
+  	TCanvas* c = new TCanvas("c","",750,750);
   	c->Divide(2,2);
 	c->cd(1);
-  	intree->Draw("xRadiator");
-  	h_xRadiator->SetLineColor(kRed);
-  	h_xRadiator->Draw("same");
+	xRadiator_Histo->SetStats(0);
+	xRadiator_Histo->SetLineColor(kBlack);
+  	xRadiator_Histo->Draw();
+  	xRadiator_HistoInSpacialRange->SetLineColor(kBlue);
+  	xRadiator_HistoInSpacialRange->Draw("same");
+  	xRadiator_HistoInAngularRange->SetLineColor(kGreen);
+  	xRadiator_HistoInAngularRange->Draw("same");
+  	xRadiator_HistoInRange->SetLineColor(kRed);
+  	xRadiator_HistoInRange->Draw("same");
 	c->cd(2);
-  	intree->Draw("yRadiator");
-  	h_yRadiator->SetLineColor(kRed);
-  	h_yRadiator->Draw("same");
+  	yRadiator_Histo->SetStats(0);
+	yRadiator_Histo->SetLineColor(kBlack);
+  	yRadiator_Histo->Draw();
+  	yRadiator_HistoInSpacialRange->SetLineColor(kBlue);
+  	yRadiator_HistoInSpacialRange->Draw("same");
+  	yRadiator_HistoInAngularRange->SetLineColor(kGreen);
+  	yRadiator_HistoInAngularRange->Draw("same");
+  	yRadiator_HistoInRange->SetLineColor(kRed);
+  	yRadiator_HistoInRange->Draw("same");
 	c->cd(3);
-  	h_xyRadiator->Draw("colz");
+	xyRadiator_Histo->SetStats(0);
+  	xyRadiator_Histo->Draw("colz");
 	c->cd(4);
-  	intree->Draw("theta");
-  	h_theta->SetLineColor(kRed);
-  	h_theta->Draw("same");
+	xyRadiator_HistoInRange->SetStats(0);
+  	xyRadiator_HistoInRange->Draw("colz");
+	/*theta_Histo->SetStats(0);
+	theta_Histo->SetLineColor(kBlack);
+  	theta_Histo->Draw();
+  	theta_HistoInAngularRange->SetLineColor(kGreen);
+  	theta_HistoInAngularRange->Draw("same");*/
   
-  	//In this canvas I plot all the hit on the UPPER and LOWER SI and on the radiator
-  	TCanvas* c1 = new TCanvas();
+  	//In this canvas I plot selected hit on the UPPER and LOWER SI
+  	TCanvas* c1 = new TCanvas("c1","",750,750);
   	c1->Divide(2,2);
 	c1->cd(1);
-  	intree->Draw("yHit[0]:xHit[0]");
-	c1->cd(2);
+	x0Hit_Histo->SetStats(0);
+	x0Hit_Histo->SetLineColor(kBlack);
+	x0Hit_Histo->Draw();
+	x0Hit_HistoInSpacialRange->SetLineColor(kBlue);
+  	x0Hit_HistoInSpacialRange->Draw("same");
+  	x0Hit_HistoInAngularRange->SetLineColor(kGreen);
+  	x0Hit_HistoInAngularRange->Draw("same");
+  	x0Hit_HistoInRange->SetLineColor(kRed);
+  	x0Hit_HistoInRange->Draw("same");
+  	c1->cd(2);
+  	y0Hit_Histo->SetStats(0);
+	y0Hit_Histo->SetLineColor(kBlack);
+	y0Hit_Histo->Draw();
+	y0Hit_HistoInSpacialRange->SetLineColor(kBlue);
+  	y0Hit_HistoInSpacialRange->Draw("same");
+  	y0Hit_HistoInAngularRange->SetLineColor(kGreen);
+  	y0Hit_HistoInAngularRange->Draw("same");
+  	y0Hit_HistoInRange->SetLineColor(kRed);
+  	y0Hit_HistoInRange->Draw("same");
+  	c1->cd(3);
+  	x1Hit_Histo->SetStats(0);
+	x1Hit_Histo->SetLineColor(kBlack);
+	x1Hit_Histo->Draw();
+	x1Hit_HistoInSpacialRange->SetLineColor(kBlue);
+  	x1Hit_HistoInSpacialRange->Draw("same");
+  	x1Hit_HistoInAngularRange->SetLineColor(kGreen);
+  	x1Hit_HistoInAngularRange->Draw("same");
+  	x1Hit_HistoInRange->SetLineColor(kRed);
+  	x1Hit_HistoInRange->Draw("same");
+  	c1->cd(4);
+  	y1Hit_Histo->SetStats(0);
+	y1Hit_Histo->SetLineColor(kBlack);
+	y1Hit_Histo->Draw();
+	y1Hit_HistoInSpacialRange->SetLineColor(kBlue);
+  	y1Hit_HistoInSpacialRange->Draw("same");
+  	y1Hit_HistoInAngularRange->SetLineColor(kGreen);
+  	y1Hit_HistoInAngularRange->Draw("same");
+  	y1Hit_HistoInRange->SetLineColor(kRed);
+  	y1Hit_HistoInRange->Draw("same");
+  	
+  	TCanvas* c2 = new TCanvas("c2","",750,750);
+  	c2->Divide(2,2);
+	c2->cd(1);
+	xy0_Histo->SetStats(0);
+	xy0_Histo->Draw("colz");
+	c2->cd(2);
+	xy0_HistoInRange->SetStats(0);
+	xy0_HistoInRange->Draw("colz");
+	c2->cd(3);
+	xy1_Histo->SetStats(0);
+	xy1_Histo->Draw("colz");
+	c2->cd(4);
+	xy1_HistoInRange->SetStats(0);
+	xy1_HistoInRange->Draw("colz");
+  	/*intree->Draw("yHit[0]:xHit[0]");
+	c2->cd(2);
 	intree->Draw("yHit[1]:xHit[1]");
-	c1->cd(3);
-	intree->Draw("yRadiator:xRadiator");
+	c2->cd(3);
+	intree->Draw("yRadiator:xRadiator");*/
 	
 	return;
 }

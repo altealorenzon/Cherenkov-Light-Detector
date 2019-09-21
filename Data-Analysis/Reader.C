@@ -241,7 +241,7 @@ void projRad(Ev_t &Ev) {
 
   //Compute the tanget  (angular coefficient of the direction) for x and y
   Double_t tgThetax = ( Ev.SiHit.z_xHit[1]- Ev.SiHit.z_xHit[0])/( Ev.SiHit.xHit[1]- Ev.SiHit.xHit[0] );
-  Double_t tgThetay = ( Ev.SiHit.z_yHit[1]- Ev.SiHit.z_yHit[0])/( Ev.SiHit.yHit[1]- Ev.SiHit.yHit[0] );
+  Double_t tgThetay = ( Ev.SiHit.z_xHit[1]- Ev.SiHit.z_xHit[0])/( Ev.SiHit.yHit[1]- Ev.SiHit.yHit[0] );
 
   //Compute the projections on the radiator plan
   Ev.PmtSignal.xRadiator = (Ev.PmtSignal.zRadiator - Ev.SiHit.z_xHit[1] + tgThetax*Ev.SiHit.xHit[1])/tgThetax;
