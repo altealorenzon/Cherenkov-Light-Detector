@@ -106,13 +106,13 @@ void RunStatsPmt(Int_t SiRunNumber) {
 	TH1F* PmtPulseHeight_HistoInTime[nChannelsPmt];
 	
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
-		PmtTime_Histo[iChannel] = new TH1F(Form("PmtTime_%i",iChannel),Form("ch %i Time [a.u.]",activeChannels[iChannel]),50,50,300);
+		PmtTime_Histo[iChannel] = new TH1F(Form("PmtTime_%i",iChannel),Form("ch %i Time [a.u.]",activeChannels[iChannel]),50,50,250);
 		PmtTime_Histo[iChannel]->SetFillColor(kAzure-8);
 		PmtTime_Histo[iChannel]->SetLineColor(kAzure-8);
-		PmtPulseHeight_Histo[iChannel] = new TH1F(Form("PmtPulseHeight_Histo_%i",iChannel),Form("ch %i Pulse Height [a.u.]",activeChannels[iChannel]),50,0,500);
+		PmtPulseHeight_Histo[iChannel] = new TH1F(Form("PmtPulseHeight_Histo_%i",iChannel),Form("ch %i Pulse Height [a.u.]",activeChannels[iChannel]),200,0,1000);
 		PmtPulseHeight_Histo[iChannel]->SetLineColor(kBlue+2);
 		PmtPulseHeight_Histo[iChannel]->SetFillColor(kBlue+2);
-		PmtPulseHeight_HistoInTime[iChannel] = new TH1F(Form("PmtPulseHeight_HistoInTime_%i",iChannel),Form("ch %i",activeChannels[iChannel]),50,0,500);
+		PmtPulseHeight_HistoInTime[iChannel] = new TH1F(Form("PmtPulseHeight_HistoInTime_%i",iChannel),Form("ch %i",activeChannels[iChannel]),200,0,1000);
 		PmtPulseHeight_HistoInTime[iChannel]->SetLineColor(kRed-7);
 		PmtPulseHeight_HistoInTime[iChannel]->SetFillColor(kRed-7);
 	}
@@ -126,6 +126,8 @@ void RunStatsPmt(Int_t SiRunNumber) {
 	intree->SetBranchAddress("DgtzID",Ev.PmtSignal.DgtzID);
 	
 	Int_t nEntries = intree->GetEntries();
+	cout << "Total number of events: " << nEntries << endl;
+	
 	Int_t timeWindow_lowerBound;
 	Int_t timeWindow_upperBound;
 	
@@ -139,22 +141,25 @@ void RunStatsPmt(Int_t SiRunNumber) {
 				timeWindow_lowerBound=80;
 				timeWindow_upperBound=120;
 			} else if(Ev.PmtSignal.DgtzID[iChannel]==31) {
-				cout << "Dgtz " << Ev.PmtSignal.DgtzID[iChannel] << endl;
 				timeWindow_lowerBound=190;
 				timeWindow_upperBound=230;
 			}
 			if(Ev.PmtSignal.Time[iChannel]>=timeWindow_lowerBound && Ev.PmtSignal.Time[iChannel]<=timeWindow_upperBound) {
 				PmtPulseHeight_HistoInTime[iChannel]->Fill(Ev.PmtSignal.PulseHeight[iChannel]);
-				if(Ev.PmtSignal.PulseHeight[iChannel]>=150) ++chCounter;
+				//if(Ev.PmtSignal.PulseHeight[iChannel]>=150) ++chCounter;
 			}
 		}
-		if(chCounter>=4) cout << "High PH in " << chCounter << " channels. Event number = " << evNumber << endl;
+		//if(nChannelsPmt==8&&chCounter>=4) cout << "High PH in " << chCounter << " channels. Event number = " << evNumber << endl;
+		//if(nChannelsPmt==26&&chCounter>=17) cout << "High PH in " << chCounter << " channels. Event number = " << evNumber << endl;
 	}
+	
+	gStyle->SetTitleFontSize(0.07);
 	
 	TLine* line_lowerBound[nChannelsPmt]; 
 	TLine* line_upperBound[nChannelsPmt];
 	
 	TCanvas* c_time = new TCanvas("c_time","",1500,750);
+	TPaveText* pt_time[nChannelsPmt];
 	Int_t nRows=2;
 	Int_t nColumns=4;
 	if(nChannelsPmt==26) {
@@ -164,8 +169,14 @@ void RunStatsPmt(Int_t SiRunNumber) {
 	c_time->Divide(nColumns,nRows);
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
 		c_time->cd(iChannel+1);
+		c_time->cd(iChannel+1)->SetLeftMargin(0.1484999);
 		PmtTime_Histo[iChannel]->SetStats(0);
 		//PmtTime_Histo[iChannel]->GetXaxis()->SetTitle("Time [a.u.]");
+		PmtTime_Histo[iChannel]->GetXaxis()->SetNdivisions(505);
+		PmtTime_Histo[iChannel]->GetXaxis()->SetLabelFont(42);
+    		PmtTime_Histo[iChannel]->GetXaxis()->SetLabelSize(0.06);
+    		PmtTime_Histo[iChannel]->GetYaxis()->SetLabelFont(42);
+    		PmtTime_Histo[iChannel]->GetYaxis()->SetLabelSize(0.06);
 		PmtTime_Histo[iChannel]->Draw();
 		if(iChannel>=8&&iChannel<24) {
 			timeWindow_lowerBound=190;
@@ -180,6 +191,18 @@ void RunStatsPmt(Int_t SiRunNumber) {
 		line_upperBound[iChannel] = new TLine(timeWindow_upperBound,0,timeWindow_upperBound,PmtTime_Histo[iChannel]->GetBinContent(PmtTime_Histo[iChannel]->GetMaximumBin()));
 		line_upperBound[iChannel]->SetLineColor(kBlack);
 		line_upperBound[iChannel]->Draw("SAME");
+		if(iChannel>=8&&iChannel<24) {
+			pt_time[iChannel] = new TPaveText(0.18,0.65,0.62,0.86,"blNDC");
+		} else {
+			pt_time[iChannel] = new TPaveText(0.55,0.65,0.99,0.86,"blNDC");
+		}
+		pt_time[iChannel]->SetBorderSize(1);
+		pt_time[iChannel]->SetLineColor(kBlack);
+		pt_time[iChannel]->SetFillColor(kWhite);
+		pt_time[iChannel]->SetTextFont(42);
+    		pt_time[iChannel]->SetTextSize(0.07);
+    		pt_time[iChannel]->AddText(Form("Events: %i", (Int_t)PmtTime_Histo[iChannel]->Integral(PmtTime_Histo[iChannel]->FindBin(timeWindow_lowerBound),PmtTime_Histo[iChannel]->FindBin(timeWindow_upperBound))));
+    		pt_time[iChannel]->Draw();
 	}
 	
 	TCanvas* c_ph = new TCanvas("c_ph","",1500,750);
@@ -190,7 +213,13 @@ void RunStatsPmt(Int_t SiRunNumber) {
 		//c_ph->cd(iChannel+1)->SetLogy();
 		PmtPulseHeight_Histo[iChannel]->SetStats(0);
 		//PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetTitle("PH [a.u.]");
-		PmtPulseHeight_Histo[iChannel]->SetTitleSize(21);
+		if(iChannel<8 || iChannel>23) PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetRangeUser(0,300);
+		PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetNdivisions(505);
+		PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetLabelFont(42);
+    		PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetLabelSize(0.06);
+		PmtPulseHeight_Histo[iChannel]->GetYaxis()->SetNdivisions(505);
+    		PmtPulseHeight_Histo[iChannel]->GetYaxis()->SetLabelFont(42);
+    		PmtPulseHeight_Histo[iChannel]->GetYaxis()->SetLabelSize(0.06);
 		PmtPulseHeight_Histo[iChannel]->Draw();
 		PmtPulseHeight_HistoInTime[iChannel]->SetStats(0);
 		PmtPulseHeight_HistoInTime[iChannel]->Draw("SAME");

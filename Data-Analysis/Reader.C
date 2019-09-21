@@ -86,8 +86,8 @@
 using namespace std;
 
 const Int_t nSiLayers = 2;
-const Int_t nChannelsPmt = 8; //8 or 26
-const Int_t nTokensInRecord = 39; // 39 for 8 channels - 71 for 26 channels
+const Int_t nChannelsPmt = 26; //8 or 26
+const Int_t nTokensInRecord = 71; // 39 for 8 channels - 71 for 26 channels
 const Int_t activeChannels[26] = {21,22,29,30,37,38,45,46,5,6,13,14,53,54,61,62,40,39,32,31,24,23,16,15,7,8};
 
 typedef struct {
