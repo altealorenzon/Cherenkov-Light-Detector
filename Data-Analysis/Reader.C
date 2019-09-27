@@ -132,8 +132,6 @@ void ReadEvent( Int_t SiRunNumber, bool debug=false ) {
 
 	TString outFile(Form("~/Documents/Cherenkov-Light-Detector/Data-Analysis/run%i.root",SiRunNumber));
 	TFile* file = new TFile( outFile,"RECREATE" );
-	TString outFile(Form("/home/sam/Documents/Cherenkov-Light-Detector/Data-Analysis/run%i.root",SiRunNumber));
-	TFile* file = new TFile( outFile,"recreate" );
 	TTree* tree = new TTree("Cherenkov","Tree with data from PMT, Silicon detectors and Scintillators in Cherenkov experiment");
 
 	Ev_t Ev;
