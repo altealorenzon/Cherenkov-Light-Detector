@@ -64,16 +64,12 @@ const Int_t activeChannels[26] = {21,22,29,30,37,38,45,46,5,6,13,14,53,54,61,62,
 //			21 22 29 30 37 38 45 46  5  6 13 14 53 54 61 62 40 39 32 31 24 23 16 15  7  8
 const Int_t xBin[26] = { 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 8, 7, 8, 7, 8, 7, 8, 7, 7, 8};
 const Int_t yBin[26] = { 6, 6, 5, 5, 4, 4, 3, 3, 8, 8, 7, 7, 2, 2, 1, 1, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8};
-<<<<<<< HEAD
+
 const Double_t xcenterRadiator = 4.96292;
 const Double_t ycenterRadiator = 3.97302;
 const Double_t Sidistx = 12.05;
 const Double_t Sidisty = 8.7;
 
-=======
-const Double_t xcenterRadiator = 4.12605;
-const Double_t ycenterRadiator = 4.96139;
->>>>>>> af5a393cb8859076fa1bded66aef9621bf52ad46
 typedef struct {
 	Double_t xHit[nSiLayers];
 	Double_t yHit[nSiLayers];
@@ -98,9 +94,13 @@ typedef struct {
 	Pmt_t PmtSignal;
 } Ev_t;
 
-void RunStatsPmt();
-void xyrad_histo();
-void ShowPmtSignal();
+void RunStatsPmt(Int_t SiRunNumber);
+void xyrad_histo(Int_t SiRunNumber,Double_t thr_theta,Double_t thr_Radiator,Double_t thr_x0,Double_t thr_y0);
+void ShowPmtSignal(Int_t SiRunNumber, Int_t evNumber);
+void PrintEventOnFile(Int_t SiRunNumber, Int_t EvNumber);
+void FillEvHisto(TTree* intree, Int_t ev, TH2F* h2_Dgtz20, TH2F* h2_Dgtz25, TH2F* h2_Dgtz31, TH2F* h2_all, Int_t norm);
+void CumPmtSignal(Int_t SiRunNumber, Int_t mod, Int_t ev);
+
 //\\//\\//\\//\\// RUNSTATSPMT //\\//\\//\\//\\//\\//\\//
 //See the time spectrum and PH spectrum of PMT active channels and select events in a particular time window
 void RunStatsPmt(Int_t SiRunNumber) {
@@ -407,11 +407,7 @@ void xyrad_histo(Int_t SiRunNumber,
     				trgSignal_HistoInAngularRange->Fill(trgDown+Dinode);
     			}
     			// CUT on spacial distribution of hits
-<<<<<<< HEAD
     			if ( (pow((xcenterRadiator - xRadiator),2)+pow((ycenterRadiator - yRadiator),2))<=pow(thr_Radiator,2) && abs(4.5 - xHit[0])<thr_x0 && abs(4.5 - yHit[0])<thr_y0 ) {
-=======
-    			if ( (pow((xcenterRadiator - xRadiator),2)+pow((ycenterRadiator - yRadiator),2))<=pow(thr_Radiator,2) && abs(5 - xHit[0])<thr_x0 && abs(5 - yHit[0])<thr_y0 ) {
->>>>>>> af5a393cb8859076fa1bded66aef9621bf52ad46
 	   		     	x0Hit_HistoInSpacialRange->Fill(xHit[0]);
     				x1Hit_HistoInSpacialRange->Fill(xHit[1]);
     				y0Hit_HistoInSpacialRange->Fill(yHit[0]);
@@ -591,7 +587,6 @@ void xyrad_histo(Int_t SiRunNumber,
 	x1Hit_Histo->Draw();
 	c3->cd(4);
 	y1Hit_Histo->Draw();
-<<<<<<< HEAD
 
 	TCanvas* c4 = new TCanvas("c4","",750,750);
   	c4->Divide(2,2);
@@ -703,10 +698,6 @@ void xyrad_histo(Int_t SiRunNumber,
 	  pt[iChannel]->AddText(Form("Selected events: %2.1f%%", PmtPulseHeight_HistoInTime[iChannel]->GetEntries()*1.0/PmtPulseHeight_Histo[iChannel]->GetEntries()*100));
 	  pt[iChannel]->Draw();
 	}*/
-=======
->>>>>>> af5a393cb8859076fa1bded66aef9621bf52ad46
-	
-	return;
 }
 
 //\\//\\//\\//\\// SHOWPMTSIGNAL //\\//\\//\\//\\//\\//\\//
@@ -743,8 +734,6 @@ void ShowPmtSignal(Int_t SiRunNumber, Int_t evNumber) {
 		xLine[i]->Draw("SAME");
 		yLine[i]->Draw("SAME");
 	}
-
-	
 }
 
 
@@ -759,27 +748,17 @@ void PrintEventOnFile(Int_t SiRunNumber, Int_t EvNumber) {
   Double_t PmtPulseHeight[nChannelsPmt];    intree->SetBranchAddress("PmtPulseHeight",PmtPulseHeight);  
   Double_t xHit[nSiLayers];                 intree->SetBranchAddress("xHit", xHit);
   Double_t yHit[nSiLayers];                 intree->SetBranchAddress("yHit", yHit);
-<<<<<<< HEAD
   Double_t zHit[nSiLayers];                 intree->SetBranchAddress("z_yHit", zHit);
   Double_t xRadiator      ;                 intree->SetBranchAddress("xRadiator", &xRadiator);
   Double_t yRadiator      ;                 intree->SetBranchAddress("yRadiator", &yRadiator);
   Double_t zRadiator      ;                 intree->SetBranchAddress("zRadiator", &zRadiator);
 
   Double_t x0_on_y0, x1_on_y1;
-
-=======
-  Double_t zHit[nSiLayers];                 intree->SetBranchAddress("z_xHit", zHit);
-  Double_t xRadiator      ;                 intree->SetBranchAddress("xRadiator", &xRadiator);
-  Double_t yRadiator       ;                intree->SetBranchAddress("yRadiator", &yRadiator);
-  Double_t zRadiator      ;                 intree->SetBranchAddress("zRadiator", &zRadiator);
- 
->>>>>>> af5a393cb8859076fa1bded66aef9621bf52ad46
   
   //Print the event information on file
   ofstream outchannels, outhit;
   outchannels.open("hitchannels.txt");
   outhit.open("trace.txt");
-<<<<<<< HEAD
 
   intree->GetEntry(EvNumber-1);
   
@@ -794,7 +773,6 @@ void PrintEventOnFile(Int_t SiRunNumber, Int_t EvNumber) {
   
   outhit << x0_on_y0   << " " << yHit[0]   << " " << -zHit[0]   << endl;
   outhit << x1_on_y1   << " " << yHit[1]   << " " << -zHit[1]   << endl;
-=======
   
   for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
     if (PmtPulseHeight[iChannel] > 150.0) {
@@ -804,7 +782,6 @@ void PrintEventOnFile(Int_t SiRunNumber, Int_t EvNumber) {
   
   outhit << xHit[0]   << " " << yHit[0]   << " " << -zHit[0]   << endl;
   outhit << xHit[1]   << " " << yHit[1]   << " " << -zHit[1]   << endl;
->>>>>>> af5a393cb8859076fa1bded66aef9621bf52ad46
   outhit << xRadiator << " " << yRadiator << " " << -zRadiator << endl;
   
   outchannels.close();
@@ -818,14 +795,10 @@ void PrintEventOnFile(Int_t SiRunNumber, Int_t EvNumber) {
 
 void FillEvHisto(TTree* intree, Int_t ev, TH2F* h2_Dgtz20, TH2F* h2_Dgtz25, TH2F* h2_Dgtz31, TH2F* h2_all, Int_t norm) {
  
- 
   Double_t PmtPulseHeight[nChannelsPmt];    intree->SetBranchAddress("PmtPulseHeight",PmtPulseHeight);
   Int_t DgtzID[nChannelsPmt];               intree->SetBranchAddress("DgtzID",DgtzID);
-<<<<<<< HEAD
   Double_t BinContent = 0.0; 
-=======
-  Int_t BinContent; 
->>>>>>> af5a393cb8859076fa1bded66aef9621bf52ad46
+
   Int_t ChannelID = 0;
   Int_t Max20 = 0; 
   Int_t Max25 = 0;
@@ -863,18 +836,16 @@ void FillEvHisto(TTree* intree, Int_t ev, TH2F* h2_Dgtz20, TH2F* h2_Dgtz25, TH2F
   for(Int_t ChannelID = 0; ChannelID<nChannelsPmt; ++ChannelID) {
     if (DgtzID[ChannelID] == 20) {
       BinContent = h2_Dgtz20->GetBinContent(xBin[ChannelID], yBin[ChannelID]);
-<<<<<<< HEAD
+
       h2_Dgtz20->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]*1.0/Max20);
       h2_all->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]*1.0/Max20);
-=======
+
       h2_Dgtz20->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]/Max20);
       h2_all->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]/Max20);
->>>>>>> af5a393cb8859076fa1bded66aef9621bf52ad46
     }
     
     else if(DgtzID[ChannelID] == 25) {
       BinContent = h2_Dgtz25->GetBinContent(xBin[ChannelID], yBin[ChannelID]);
-<<<<<<< HEAD
       h2_Dgtz25->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]*1.0/Max25);
       h2_all->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]*1.0/Max25);
     }
@@ -882,7 +853,6 @@ void FillEvHisto(TTree* intree, Int_t ev, TH2F* h2_Dgtz20, TH2F* h2_Dgtz25, TH2F
       BinContent = h2_Dgtz31->GetBinContent(xBin[ChannelID], yBin[ChannelID]);
       h2_Dgtz31->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]*1.0/Max31);
       h2_all->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]*1.0/Max31);
-=======
       h2_Dgtz25->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]/Max25);
       h2_all->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]/Max25);
     }
@@ -890,7 +860,6 @@ void FillEvHisto(TTree* intree, Int_t ev, TH2F* h2_Dgtz20, TH2F* h2_Dgtz25, TH2F
       BinContent = h2_Dgtz31->GetBinContent(xBin[ChannelID], yBin[ChannelID]);
       h2_Dgtz31->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]/Max31);
       h2_all->SetBinContent(xBin[ChannelID], yBin[ChannelID], BinContent+PmtPulseHeight[ChannelID]/Max31);
->>>>>>> af5a393cb8859076fa1bded66aef9621bf52ad46
     }
     
   }
