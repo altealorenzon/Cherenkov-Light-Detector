@@ -89,6 +89,8 @@ const Int_t nSiLayers = 2;
 const Int_t nChannelsPmt = 26; //8 or 26
 const Int_t nTokensInRecord = 71; // 39 for 8 channels - 71 for 26 channels
 const Int_t activeChannels[26] = {21,22,29,30,37,38,45,46,5,6,13,14,53,54,61,62,40,39,32,31,24,23,16,15,7,8};
+const Double_t Sidistx = 12.05;
+const Double_t Sidisty = 8.7;
 
 typedef struct {
 	Double_t xHit[nSiLayers];
@@ -109,9 +111,17 @@ typedef struct {
 	Double_t zRadiator;
 } Pmt_t;
 
+typedef struct{
+  Double_t SciUp;
+  Double_t SciDown;
+  Double_t Dinode;
+
+} Trg_t;
+
 typedef struct {
-	Si_t  SiHit;
-	Pmt_t PmtSignal;
+  Si_t  SiHit;
+  Pmt_t PmtSignal;
+  Trg_t TrgSignal;
 } Ev_t;
 
 void fillEvent( Ev_t &Ev, Double_t* vRecord );
@@ -120,8 +130,8 @@ void projRad( Ev_t &Ev );
 
 void ReadEvent( Int_t SiRunNumber, bool debug=false ) {
 
-	TString outFile(Form("/home/altea/Documents/Cherenkov-Light-Detector/Data-Analysis/run%i.root",SiRunNumber));
-	TFile* file = new TFile( outFile,"recreate" );
+	TString outFile(Form("~/Documents/Cherenkov-Light-Detector/Data-Analysis/run%i.root",SiRunNumber));
+	TFile* file = new TFile( outFile,"RECREATE" );
 	TTree* tree = new TTree("Cherenkov","Tree with data from PMT, Silicon detectors and Scintillators in Cherenkov experiment");
 
 	Ev_t Ev;
@@ -140,7 +150,9 @@ void ReadEvent( Int_t SiRunNumber, bool debug=false ) {
 							tree->Branch("xRadiator",&Ev.PmtSignal.xRadiator,"xRadiator/D");
 							tree->Branch("yRadiator",&Ev.PmtSignal.yRadiator,"yRadiator/D");
 							tree->Branch("zRadiator",&Ev.PmtSignal.zRadiator,"zRadiator/D");
-	//TODO add scintillators 
+							tree->Branch("TrgUp"  ,&Ev.TrgSignal.SciUp  , "TrgUp/D");
+							tree->Branch("TrgDown",&Ev.TrgSignal.SciDown, "TrgDown/D");
+							tree->Branch("Dinode" ,&Ev.TrgSignal.Dinode , "Dinode/D");
 	
 	ifstream file_ascii(Form("run%i.dat",SiRunNumber));
 	Int_t evCounter=0;	
@@ -172,21 +184,23 @@ void ReadEvent( Int_t SiRunNumber, bool debug=false ) {
 
 void fillEvent( Ev_t &Ev, Double_t* vRecord ) {
 	Ssiz_t it=0;
-	Ev.SiHit.xHit[0]=vRecord[it++];
 	Ev.SiHit.yHit[0]=vRecord[it++];
+	Ev.SiHit.xHit[0]=vRecord[it++];
 	Ev.SiHit.z_xHit[0]= 9.00; 
 	Ev.SiHit.z_yHit[0]= 10.5; 
-	Ev.SiHit.xHit[1]=vRecord[it++];
 	Ev.SiHit.yHit[1]=vRecord[it++];
+	Ev.SiHit.xHit[1]=vRecord[it++];
 	Ev.SiHit.z_xHit[1]= 21.05;
 	Ev.SiHit.z_yHit[1]= 19.55;
-	
 	Ev.PmtSignal.zRadiator= 41.55;  
+	Ev.TrgSignal.SciUp   = vRecord[it++];
+	Ev.TrgSignal.SciDown = vRecord[it++];
+	Ev.TrgSignal.Dinode  = vRecord[it++];
 	
 	//Function to calculate x,y projections and polar angles
 	projRad(Ev);
 	if(nChannelsPmt==8) {
-		it+=8;
+  		it+=5;
 		for(Int_t i=0; i<nChannelsPmt; ++i) {
 			Ev.PmtSignal.PulseHeight[i]=vRecord[it++];
 		}
@@ -204,7 +218,7 @@ void fillEvent( Ev_t &Ev, Double_t* vRecord ) {
 			Ev.PmtSignal.ChannelID[i]=activeChannels[i];
 		}
 	} else if(nChannelsPmt==26) {
-		it+=6;
+		it+=3;
 		Int_t ch7_ph=vRecord[it++];
 		Int_t ch8_ph=vRecord[it++];
 		for(Int_t i=0; i<nChannelsPmt-2; ++i) {
@@ -240,19 +254,25 @@ void fillEvent( Ev_t &Ev, Double_t* vRecord ) {
 void projRad(Ev_t &Ev) {
 
   //Compute the tanget  (angular coefficient of the direction) for x and y
-  Double_t tgThetax = ( Ev.SiHit.z_xHit[1]- Ev.SiHit.z_xHit[0])/( Ev.SiHit.xHit[1]- Ev.SiHit.xHit[0] );
-  Double_t tgThetay = ( Ev.SiHit.z_xHit[1]- Ev.SiHit.z_xHit[0])/( Ev.SiHit.yHit[1]- Ev.SiHit.yHit[0] );
-
+  //Double_t tgThetax = ( Ev.SiHit.z_xHit[1]- Ev.SiHit.z_xHit[0])/( Ev.SiHit.xHit[1]- Ev.SiHit.xHit[0] );
+  //Double_t tgThetay = ( Ev.SiHit.z_xHit[1]- Ev.SiHit.z_xHit[0])/( Ev.SiHit.yHit[1]- Ev.SiHit.yHit[0] );
+  Double_t x0_on_y0, x1_on_y1;
+  
   //Compute the projections on the radiator plan
-  Ev.PmtSignal.xRadiator = (Ev.PmtSignal.zRadiator - Ev.SiHit.z_xHit[1] + tgThetax*Ev.SiHit.xHit[1])/tgThetax;
-  Ev.PmtSignal.yRadiator = (Ev.PmtSignal.zRadiator - Ev.SiHit.z_yHit[1] + tgThetay*Ev.SiHit.yHit[1])/tgThetay;
+  Ev.PmtSignal.xRadiator = Ev.SiHit.xHit[0] + ( Ev.SiHit.xHit[1] -  Ev.SiHit.xHit[0])/Sidistx*32.55; //(Ev.PmtSignal.zRadiator - Ev.SiHit.z_xHit[1] + tgThetax*Ev.SiHit.xHit[1])/tgThetax;
+  Ev.PmtSignal.yRadiator =  Ev.SiHit.yHit[0] + ( Ev.SiHit.yHit[1] -  Ev.SiHit.yHit[0])/Sidisty*30.7;  //(Ev.PmtSignal.zRadiator - Ev.SiHit.z_yHit[1] + tgThetay*Ev.SiHit.yHit[1])/tgThetay;
 
-  Double_t xyradius = sqrt(pow((Ev.SiHit.xHit[1] - Ev.SiHit.xHit[0]),2) + pow((Ev.SiHit.yHit[1] - Ev.SiHit.yHit[0]),2));
+
+  x0_on_y0 =  Ev.SiHit.xHit[0] + ( Ev.SiHit.xHit[1] -  Ev.SiHit.xHit[0])/Sidistx*1.9; //projection of xHit[0] on the yHit[0] plane (below)
+  x1_on_y1 =  Ev.SiHit.xHit[1] - ( Ev.SiHit.xHit[1] -  Ev.SiHit.xHit[0])/Sidistx*1.9; //projection of xHit[1] on the yHit[1] plane (above)
+
+  
+  Double_t xyradius = sqrt(pow((x0_on_y0 - x1_on_y1),2) + pow((Ev.SiHit.yHit[1] - Ev.SiHit.yHit[0]),2));
   
   //Compute the cos of the polar and azimuthal angles
-  Ev.SiHit.phi = (Ev.SiHit.xHit[1] - Ev.SiHit.xHit[0])/xyradius; //cos of the azimuthal angle
-  Ev.SiHit.theta = (Ev.SiHit.z_yHit[1] - Ev.SiHit.z_yHit[0])/sqrt(pow(xyradius,2) + pow((Ev.SiHit.z_yHit[1] - Ev.SiHit.z_yHit[0]),2)); //cos of the polar angle
-
+  Ev.SiHit.phi   = (x1_on_y1   - x0_on_y0)/xyradius; //cos of the azimuthal angle
+  Ev.SiHit.theta = (Sidisty)/sqrt(pow(xyradius,2) + pow(Sidisty,2)); //cos of the polar angle
+  
   return;
 }
 
@@ -263,7 +283,7 @@ void printEvent( Ev_t &Ev ) {
 	cout << "******************* new event! *******************" << endl;
 	cout << "* First Silicon layer" << endl;
 	cout << "*      x = " << Ev.SiHit.xHit[0] << endl;
-	cout << "*      y = " << Ev.SiHit.yHit[0] << endl;
+ 	cout << "*      y = " << Ev.SiHit.yHit[0] << endl;
 	cout << "*	z of x layer = " << Ev.SiHit.z_xHit[0] << endl;
 	cout << "*	z of y layer = " << Ev.SiHit.z_yHit[0] << endl;
 	cout << "* Second Silicon layer" << endl;
