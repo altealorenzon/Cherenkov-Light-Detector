@@ -132,9 +132,10 @@ void RunStatsPmt(Int_t SiRunNumber) {
 		PmtPulseHeight_Histo[iChannel] = new TH1F(Form("PmtPulseHeight_Histo_%i",iChannel),Form("ch %i Pulse Height [a.u.]",activeChannels[iChannel]),200,0,1000);
 		PmtPulseHeight_Histo[iChannel]->SetLineColor(kBlue+2);
 		PmtPulseHeight_Histo[iChannel]->SetFillColor(kBlue+2);
-		PmtPulseHeight_HistoInTime[iChannel] = new TH1F(Form("PmtPulseHeight_HistoInTime_%i",iChannel),Form("ch %i",activeChannels[iChannel]),200,0,1000);
-		PmtPulseHeight_HistoInTime[iChannel]->SetLineColor(kRed-7);
-		PmtPulseHeight_HistoInTime[iChannel]->SetFillColor(kRed-7);
+		PmtPulseHeight_Histo[iChannel]->SetFillStyle(3003);
+		PmtPulseHeight_HistoInTime[iChannel] = new TH1F(Form("PmtPulseHeight_HistoInTime_%i",iChannel),Form("ch %i Pulse Height [a.u.]",activeChannels[iChannel]),200,0,1000);
+		PmtPulseHeight_HistoInTime[iChannel]->SetLineColor(kRed-9);
+		PmtPulseHeight_HistoInTime[iChannel]->SetFillColor(kRed-9);
 	}
 	
 	
@@ -227,17 +228,17 @@ void RunStatsPmt(Int_t SiRunNumber) {
 	c_ph->Divide(nColumns,nRows);
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
 		c_ph->cd(iChannel+1);
-		PmtPulseHeight_Histo[iChannel]->SetStats(0);
-		/*if(iChannel<8 || iChannel>23)*/ PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetRangeUser(0,300);
-		PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetNdivisions(505);
-		PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetLabelFont(42);
-    		PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetLabelSize(0.06);
-		PmtPulseHeight_Histo[iChannel]->GetYaxis()->SetNdivisions(505);
-    		PmtPulseHeight_Histo[iChannel]->GetYaxis()->SetLabelFont(42);
-    		PmtPulseHeight_Histo[iChannel]->GetYaxis()->SetLabelSize(0.06);
-		PmtPulseHeight_Histo[iChannel]->Draw();
 		PmtPulseHeight_HistoInTime[iChannel]->SetStats(0);
-		PmtPulseHeight_HistoInTime[iChannel]->Draw("SAME");
+		PmtPulseHeight_HistoInTime[iChannel]->GetXaxis()->SetRangeUser(0,300);
+		PmtPulseHeight_HistoInTime[iChannel]->GetXaxis()->SetNdivisions(505);
+		PmtPulseHeight_HistoInTime[iChannel]->GetXaxis()->SetLabelFont(42);
+    		PmtPulseHeight_HistoInTime[iChannel]->GetXaxis()->SetLabelSize(0.06);
+		PmtPulseHeight_HistoInTime[iChannel]->GetYaxis()->SetNdivisions(505);
+    		PmtPulseHeight_HistoInTime[iChannel]->GetYaxis()->SetLabelFont(42);
+    		PmtPulseHeight_HistoInTime[iChannel]->GetYaxis()->SetLabelSize(0.06);
+		PmtPulseHeight_HistoInTime[iChannel]->Draw();
+		PmtPulseHeight_Histo[iChannel]->SetStats(0);
+		PmtPulseHeight_Histo[iChannel]->Draw("SAME");
 		pt[iChannel] = new TPaveText(0.23,0.65,0.99,0.86,"blNDC");
 		pt[iChannel]->SetBorderSize(1);
 		pt[iChannel]->SetLineColor(kBlack);
@@ -275,6 +276,7 @@ void xyrad_histo(Int_t SiRunNumber,
   	TH1F* yRadiator_HistoInAngularRange = new TH1F("yRadiator_HistoInAngularRange", "", 50, 0, 10);
   	TH2F* xyRadiator_Histo = new TH2F("xyRadiator_Histo", "Before cuts", 50, 0, 10, 50, 0, 10);
   	TH2F* xyRadiator_HistoInRange = new TH2F("xyRadiator_HistoInRange", "After cuts", 50, 0, 10, 50, 0, 10);
+  	TH2F* xyRadiator_HistoBkg = new TH2F("xyRadiator_HistoBkg","Background hits on radiator plane",50,0,10,50,0,10);
   	//hit on Silicon detetcors
   	TH1F* x0Hit_Histo = new TH1F("x0Hit_Histo", "x Hit of UPPER Si", 50, 0, 10);
   	TH1F* x1Hit_Histo = new TH1F("x1Hit_Histo", "x Hit of LOWER Si", 50, 0, 10);
@@ -296,6 +298,8 @@ void xyrad_histo(Int_t SiRunNumber,
   	TH2F* xy1_Histo = new TH2F("xy1_Histo", "LOWER Si, before cuts", 50, 0, 10, 50, 0, 10);
   	TH2F* xy0_HistoInRange = new TH2F("xy0_HistoInRange", "UPPER Si, after cuts", 50, 0, 10, 50, 0, 10);
   	TH2F* xy1_HistoInRange = new TH2F("xy1_HistoInRange", "LOWER Si, after cuts", 50, 0, 10, 50, 0, 10);
+  	TH2F* xy0_HistoBkg = new TH2F("xy0_HistoBkg","Background hits on UPPER Si",50,0,10,50,0,10);
+  	TH2F* xy1_HistoBkg = new TH2F("xy1_HistoBkg","Background hits on LOWER Si",50,0,10,50,0,10);
   	//theta
   	TH1F* theta_Histo = new TH1F("theta_Histo", "cos(#theta)", 50, 0.9, 1);
   	TH1F* theta_HistoInAngularRange = new TH1F("theta_HistoInAngularRange", "", 50, 0.9, 1);
@@ -313,50 +317,49 @@ void xyrad_histo(Int_t SiRunNumber,
   	TH1F* Dinode_HistoInSpacialRange  = new TH1F("Dinode_HistoInSpacialRange","",50,0,700);
   	TH1F* Dinode_HistoInAngularRange  = new TH1F("Dinode_HistoInAngularRange","",50,0,700);
   	TH1F* Dinode_HistoInRange  = new TH1F("Dinode_HistoInRange","",50,0,700);
-  	TH1F* Dinode_HistoLower = new TH1F("Dinode_HistoLower","",30,0,200);
-  	TH1F* Dinode_HistoUpper = new TH1F("Dinode_HistoUpper","",30,0,200);
+  	TH1F* Dinode_HistoLower = new TH1F("Dinode_HistoLower","Dinode Bkg Signal",30,0,200);
+  	TH1F* Dinode_HistoUpper = new TH1F("Dinode_HistoUpper","Dinode Bkg Signal",30,0,200);
   	TH1F* trgSignal_Histo  = new TH1F("trgSignal_Histo","Trigger Signal",50,0,700);
   	TH1F* trgSignal_HistoInSpacialRange  = new TH1F("trgSignal_HistoInSpacialRange","",50,0,700);
   	TH1F* trgSignal_HistoInAngularRange  = new TH1F("trgSignal_HistoInAngularRange","",50,0,700);
   	TH1F* trgSignal_HistoInRange  = new TH1F("trgSignal_HistoInRange","",50,0,700);
   	// Pmt pulse height
-  	TH1F* PmtIntegratedPulseHeight_HistoInRange = new TH1F("PmtIntegratedPulseHeight_HistoinRange","",70,500,15000);
+  	TH1F* PmtIntegratedPulseHeight_HistoInRange = new TH1F("PmtIntegratedPulseHeight_HistoinRange","Integrated Pmt PH",70,500,15000);
   	TH1F* PmtIntegratedPulseHeight_HistoLower = new TH1F("PmtIntegratedPulseHeight_HistoLower","",70,500,15000);
   	TH1F* PmtIntegratedPulseHeight_HistoUpper = new TH1F("PmtIntegratedPulseHeight_HistoUpper","",70,500,15000);
+  	TH1F* PmtPulseHeight_HistoInRange[nChannelsPmt];
+  	TH1F* PmtPulseHeight_HistoLower[nChannelsPmt];
+  	TH1F* PmtPulseHeight_HistoUpper[nChannelsPmt];
+  	for(Int_t iChannel = 0; iChannel < nChannelsPmt; iChannel++) {
+  		PmtPulseHeight_HistoInRange[iChannel] = new TH1F(Form("PmtPulseHeight_HistoInRange_%i",iChannel),Form("ch %i Pulse Height [a.u.]",activeChannels[iChannel]),200,0,1000);
+  		PmtPulseHeight_HistoInRange[iChannel]->SetStats(0);
+  		PmtPulseHeight_HistoInRange[iChannel]->SetLineColor(kRed-10);
+  		PmtPulseHeight_HistoInRange[iChannel]->SetFillColor(kRed-10);
+		PmtPulseHeight_HistoLower[iChannel] = new TH1F(Form("PmtPulseHeight_HistoLower_%i",iChannel),"",200,0,1000);
+		PmtPulseHeight_HistoLower[iChannel]->SetStats(0);
+		PmtPulseHeight_HistoLower[iChannel]->SetLineColor(kBlue+3);
+	  	PmtPulseHeight_HistoLower[iChannel]->SetFillColor(kBlue+3);
+	  	PmtPulseHeight_HistoLower[iChannel]->SetFillStyle(3004);
+	  	PmtPulseHeight_HistoUpper[iChannel] = new TH1F(Form("PmtPulseHeight_HistoUpper_%i",iChannel),"",200,0,1000);
+	  	PmtPulseHeight_HistoUpper[iChannel]->SetStats(0);
+	  	PmtPulseHeight_HistoUpper[iChannel]->SetLineColor(kBlue-8);
+	  	PmtPulseHeight_HistoUpper[iChannel]->SetFillColor(kBlue-8);
+	  	PmtPulseHeight_HistoUpper[iChannel]->SetFillStyle(3005);
+  	}
   	
-	Double_t xRadiator, yRadiator, theta;
-	Double_t xHit[nSiLayers], yHit[nSiLayers];
-	Double_t PmtTime[nChannelsPmt];
-	Double_t PulseHeight[nChannelsPmt];
-	Int_t ChannelID[nChannelsPmt];
-	Int_t DgtzID[nChannelsPmt];
-	Double_t trgUp;
-	Double_t trgDown;
-	Double_t Dinode;
-	intree->SetBranchAddress("DgtzID",DgtzID);
-	intree->SetBranchAddress("PmtTime",PmtTime);
-	intree->SetBranchAddress("xRadiator", &xRadiator);  
-  	intree->SetBranchAddress("yRadiator", &yRadiator);  
-        intree->SetBranchAddress("xHit", xHit);             
-        intree->SetBranchAddress("yHit", yHit);             
-    	intree->SetBranchAddress("theta", &theta);
-	intree->SetBranchAddress("PmtPulseHeight",PulseHeight);  //TH1F* PmtPulseHeight_HistoLower[nChannelsPmt];
-                                                               	 //TH1F* PmtPulseHeight_HistoUpper[nChannelsPmt];
-	intree->SetBranchAddress("PmtChannelID",ChannelID);
-	intree->SetBranchAddress("TrgUp",&trgUp);
-	intree->SetBranchAddress("TrgDown",&trgDown);
-	intree->SetBranchAddress("Dinode",&Dinode);
+	Double_t xRadiator;			intree->SetBranchAddress("xRadiator", &xRadiator);  
+	Double_t yRadiator;			intree->SetBranchAddress("yRadiator", &yRadiator);  
+	Double_t theta;				intree->SetBranchAddress("theta", &theta);
+	Double_t xHit[nSiLayers];		intree->SetBranchAddress("xHit", xHit); 
+	Double_t yHit[nSiLayers];		intree->SetBranchAddress("yHit", yHit);
+	Double_t PmtTime[nChannelsPmt];		intree->SetBranchAddress("PmtTime",PmtTime);
+	Double_t PulseHeight[nChannelsPmt];	intree->SetBranchAddress("PmtPulseHeight",PulseHeight);
+	Int_t ChannelID[nChannelsPmt];		intree->SetBranchAddress("PmtChannelID",ChannelID);
+	Int_t DgtzID[nChannelsPmt];		intree->SetBranchAddress("DgtzID",DgtzID);
+	Double_t trgUp;				intree->SetBranchAddress("TrgUp",&trgUp);
+	Double_t trgDown;			intree->SetBranchAddress("TrgDown",&trgDown);
+	Double_t Dinode;			intree->SetBranchAddress("Dinode",&Dinode);
 
-/*	for(Int_t iChannel = 0; iChannel < nChannelsPmt; iChannel++) {
-	  PmtPulseHeight_HistoLower[iChannel] = new TH1F(Form("PmtPulseHeight_HistoLower_%i",iChannel),Form("ch %i Pulse Height [a.u.]",activeChannels[iChannel]),200,0,1000);
-	  PmtPulseHeight_HistoLower[iChannel]->SetLineColor(kBlue+2);
-	  PmtPulseHeight_HistoLower[iChannel]->SetFillColor(kBlue+2);
-	  PmtPulseHeight_HistoUpper[iChannel] = new TH1F(Form("PmtPulseHeight_HistoUpper_%i",iChannel),Form("ch %i",activeChannels[iChannel]),200,0,1000);
-	  PmtPulseHeight_HistoUpper[iChannel]->SetLineColor(kRed-7);
-	  PmtPulseHeight_HistoUpper[iChannel]->SetFillColor(kRed-7);
-	  
-	}*/
-  	
   	vector<Int_t> selectedEvents;
   	Int_t timeWindow_lowerBound;
 	Int_t timeWindow_upperBound;
@@ -436,30 +439,37 @@ void xyrad_histo(Int_t SiRunNumber,
     				trgSignal_HistoInRange->Fill(trgDown+Dinode);
 	   			selectedEvents.push_back(i+1);
 				Double_t IntegratedSignal=0;
-	   			for(Int_t ChId = 0; ChId<nChannelsPmt; ChId++) {
-			      		if(DgtzID[ChId] == 31) PulseHeight[ChId]/=4;
-			      		IntegratedSignal+=PulseHeight[ChId];
+	   			for(Int_t iChannel=0; iChannel<nChannelsPmt; iChannel++) {
+			      		if(DgtzID[iChannel] == 31) PulseHeight[iChannel]/=4;
+			      		PmtPulseHeight_HistoInRange[iChannel]->Fill(PulseHeight[iChannel]);
+			      		IntegratedSignal+=PulseHeight[iChannel];
 			    	}
 			    	PmtIntegratedPulseHeight_HistoInRange->Fill(IntegratedSignal);
 			}
 			// Trying to find some kind of background on the Pmt channels
-    			if ( (pow((xcenterRadiator - xRadiator),2)+pow((ycenterRadiator - yRadiator),2)) >= pow(thr_Radiator,2)) {
+    			if ( (pow((xcenterRadiator - xRadiator),2)+pow((ycenterRadiator - yRadiator),2)) >= pow((thr_Radiator+1),2)) {
     				if( yRadiator < ycenterRadiator && yHit[0] < 1.0 ) {
+    					xyRadiator_HistoBkg->Fill(xRadiator,yRadiator);
+    					xy0_HistoBkg->Fill(xHit[0],yHit[0]);
+    					xy1_HistoBkg->Fill(xHit[1],yHit[1]);
     					Dinode_HistoLower->Fill(Dinode);
     					Double_t IntegratedSignal=0;
-    					for(Int_t ChId = 0; ChId<nChannelsPmt; ChId++) {
-			      			if(DgtzID[ChId] == 31) PulseHeight[ChId]/=4;
-			      			//PmtPulseHeight_HistoLower[ChId]->Fill(PulseHeight[ChId]);
-			      			IntegratedSignal+=PulseHeight[ChId];
+    					for(Int_t iChannel=0; iChannel<nChannelsPmt; iChannel++) {
+			      			if(DgtzID[iChannel]==31) PulseHeight[iChannel]/=4;
+			      			PmtPulseHeight_HistoLower[iChannel]->Fill(PulseHeight[iChannel]);
+			      			IntegratedSignal+=PulseHeight[iChannel];
 			    		}
 			    		PmtIntegratedPulseHeight_HistoLower->Fill(IntegratedSignal);
     				} else if(yRadiator > ycenterRadiator && yHit[0] > 8.0 ) {
+    					xyRadiator_HistoBkg->Fill(xRadiator,yRadiator);
+    					xy0_HistoBkg->Fill(xHit[0],yHit[0]);
+    					xy1_HistoBkg->Fill(xHit[1],yHit[1]);
     					Dinode_HistoUpper->Fill(Dinode);
     					Double_t IntegratedSignal=0;
-    					for(Int_t ChId = 0; ChId<nChannelsPmt; ChId++) {
-			      			if(DgtzID[ChId] == 31) PulseHeight[ChId]/=4;
-			      			//PmtPulseHeight_HistoUpper[ChId]->Fill(PulseHeight[ChId]);
-			      			IntegratedSignal+=PulseHeight[ChId];
+    					for(Int_t iChannel=0; iChannel<nChannelsPmt; iChannel++) {
+			      			if(DgtzID[iChannel]==31) PulseHeight[iChannel]/=4;
+			      			PmtPulseHeight_HistoUpper[iChannel]->Fill(PulseHeight[iChannel]);
+			      			IntegratedSignal+=PulseHeight[iChannel];
 			    		}
 			    		PmtIntegratedPulseHeight_HistoUpper->Fill(IntegratedSignal);
     				}
@@ -468,8 +478,8 @@ void xyrad_histo(Int_t SiRunNumber,
 	}
 	
 	cout << "Selected events = " << selectedEvents.size() << endl;
-	ofstream selectedEvents_fout(Form("run%i_selectedEvents_thetaThr%1.1f_RadiatorThr%1.1f_xUpperSiThr%1.1f.txt",
-					   SiRunNumber,thr_theta,thr_Radiator,thr_x0));
+	ofstream selectedEvents_fout(Form("./run%i_Results/run%i_selectedEvents_thetaThr%1.4f_RadiatorThr%2imm_xUpperSiThr%3imm.txt",
+					   SiRunNumber,SiRunNumber,thr_theta,(Int_t)thr_Radiator*10,(Int_t)thr_x0*10));
 	
 	for(Int_t iEv=0; iEv<selectedEvents.size(); ++iEv) {
 		selectedEvents_fout << selectedEvents[iEv] << endl;
@@ -506,6 +516,14 @@ void xyrad_histo(Int_t SiRunNumber,
 	c->cd(4);
 	xyRadiator_HistoInRange->SetStats(0);
   	xyRadiator_HistoInRange->Draw("colz");
+  	TPaveText* pt = new TPaveText(0.1754679,0.6111212,0.8216355,0.8106858,"blNDC");
+	pt->SetBorderSize(1);
+	pt->SetLineColor(kBlack);
+	pt->SetFillColor(kWhite);
+	pt->SetTextFont(42);
+	pt->SetTextSize(0.06);
+	pt->AddText(Form("Selected events: %zu (%2.1f%%)",selectedEvents.size(),selectedEvents.size()*100.0/intree->GetEntries()));
+	pt->Draw();
 	/*theta_Histo->SetStats(0);
 	theta_Histo->SetLineColor(kBlack);
   	theta_Histo->Draw();
@@ -570,13 +588,7 @@ void xyrad_histo(Int_t SiRunNumber,
 	c2->cd(4);
 	xy1_HistoInRange->SetStats(0);
 	xy1_HistoInRange->Draw("colz");
-  	/*intree->Draw("yHit[0]:xHit[0]");
-	c2->cd(2);
-	intree->Draw("yHit[1]:xHit[1]");
-	c2->cd(3);
-	intree->Draw("yRadiator:xRadiator");*/
-
-
+  	
 	TCanvas* c3 = new TCanvas("c3", "", 750, 750);
 	c3->Divide(2,2);
 	c3->cd(1);
@@ -669,35 +681,93 @@ void xyrad_histo(Int_t SiRunNumber,
   	PmtIntegratedPulseHeight_HistoUpper->SetFillStyle(3005);
   	PmtIntegratedPulseHeight_HistoUpper->Draw("SAME HIST");
   	
+  	TCanvas* c6 = new TCanvas("c6","",750,750);
+  	c6->Divide(2,2);
+	c6->cd(1);
+	xy0_HistoBkg->SetStats(0);
+	xy0_HistoBkg->Draw("colz");
+	TPaveText* ptUpper = new TPaveText(0.1434938,0.6569323,0.3858066,0.720615,"blNDC");
+	ptUpper->SetBorderSize(1);
+	ptUpper->SetLineColor(kWhite);
+	ptUpper->SetFillColor(kWhite);
+	ptUpper->SetTextFont(42);
+	ptUpper->SetTextSize(0.06);
+	ptUpper->SetTextColor(kBlue-8);
+	ptUpper->AddText("Upper Bkg");
+	ptUpper->Draw();
+	TPaveText* ptLower = new TPaveText(0.1322972,0.2202511,0.3968917,0.2839338,"blNDC");
+	ptLower->SetBorderSize(1);
+	ptLower->SetLineColor(kWhite);
+	ptLower->SetFillColor(kWhite);
+	ptLower->SetTextFont(42);
+	ptLower->SetTextSize(0.06);
+	ptLower->SetTextColor(kBlue+3);
+	ptLower->AddText("Lower Bkg");
+	ptLower->Draw();
+	c6->cd(2);
+	xy1_HistoBkg->SetStats(0);
+	xy1_HistoBkg->Draw("colz");
+	c6->cd(3);
+	xyRadiator_HistoBkg->SetStats(0);
+	xyRadiator_HistoBkg->Draw("colz");
+	TLine* line1=new TLine(xcenterRadiator-3,  ycenterRadiator,xcenterRadiator+3,  ycenterRadiator);
+	line1->SetLineColor(kRed-10); line1->SetLineWidth(2); line1->Draw("SAME");
+	TLine* line2=new TLine(xcenterRadiator-3,ycenterRadiator+3,xcenterRadiator+3,ycenterRadiator+3); 
+	line2->SetLineColor(kRed-10); line2->SetLineWidth(2); line2->Draw("SAME");
+	TLine* line3=new TLine(xcenterRadiator-3,  ycenterRadiator,xcenterRadiator-3,ycenterRadiator+3);
+	line3->SetLineColor(kRed-10); line3->SetLineWidth(2); line3->Draw("SAME");
+	TLine* line4=new TLine(xcenterRadiator+3,  ycenterRadiator,xcenterRadiator+3,ycenterRadiator+3);
+	line4->SetLineColor(kRed-10); line4->SetLineWidth(2); line4->Draw("SAME");
+	TLine* line5=new TLine(0,  ycenterRadiator,10,ycenterRadiator);
+	line5->SetLineColor(kBlack); line5->SetLineWidth(2); line5->SetLineStyle(5); line5->Draw("SAME");
+	TPaveText* ptPmt = new TPaveText(0.2169559,0.6924242,0.4227859,0.7560606,"blNDC");
+	ptPmt->SetBorderSize(1);
+	ptPmt->SetLineColor(kWhite);
+	ptPmt->SetFillColor(kWhite);
+	ptPmt->SetTextFont(42);
+	ptPmt->SetTextSize(0.06);
+	ptPmt->SetTextColor(kRed-10);
+	ptPmt->AddText("Pmt Active Area");
+	ptPmt->Draw();
+	TPaveText* ptUpperRadiator = new TPaveText(0.1322972,0.8075786,0.3968917,0.8710764,"blNDC");
+	ptUpperRadiator->SetBorderSize(1);
+	ptUpperRadiator->SetLineColor(kWhite);
+	ptUpperRadiator->SetFillColor(kWhite);
+	ptUpperRadiator->SetTextFont(42);
+	ptUpperRadiator->SetTextSize(0.06);
+	ptUpperRadiator->SetTextColor(kBlue-8);
+	ptUpperRadiator->AddText("Upper Bkg");
+	ptUpperRadiator->Draw();
+  	TPaveText* ptLowerRadiator = new TPaveText(0.1322972,0.1375786,0.3968917,0.2010764,"blNDC");
+	ptLowerRadiator->SetBorderSize(1);
+	ptLowerRadiator->SetLineColor(kWhite);
+	ptLowerRadiator->SetFillColor(kWhite);
+	ptLowerRadiator->SetTextFont(42);
+	ptLowerRadiator->SetTextSize(0.06);
+	ptLowerRadiator->SetTextColor(kBlue+3);
+	ptLowerRadiator->AddText("Lower Bkg");
+	ptLowerRadiator->Draw();
   	
-  	/*
-	TCanvas* c_ph = new TCanvas("c_ph","",1500,750);
-	TPaveText* pt[nChannelsPmt];
-	c_ph->Divide(7,4);
+  	gStyle->SetTitleFontSize(0.07);
+  	
+	TCanvas* c7 = new TCanvas("c7","",1500,750);
+	c7->Divide(7,4);
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
-	  c_ph->cd(iChannel+1);
+	  c7->cd(iChannel+1);
 	  //c_ph->cd(iChannel+1)->SetLogy();
-	  PmtPulseHeight_HistoLower[iChannel]->SetStats(0);
 	  //PmtPulseHeight_Histo[iChannel]->GetXaxis()->SetTitle("PH [a.u.]");
-	  if(iChannel<8 || iChannel>23)PmtPulseHeight_HistoLower[iChannel]->GetXaxis()->SetRangeUser(0,300);
-	  PmtPulseHeight_HistoLower[iChannel]->GetXaxis()->SetNdivisions(505);
-	  PmtPulseHeight_HistoLower[iChannel]->GetXaxis()->SetLabelFont(42);
-	  PmtPulseHeight_HistoLower[iChannel]->GetXaxis()->SetLabelSize(0.06);
-	  PmtPulseHeight_HistoLower[iChannel]->GetYaxis()->SetNdivisions(505);
-	  PmtPulseHeight_HistoLower[iChannel]->GetYaxis()->SetLabelFont(42);
-	  PmtPulseHeight_HistoLower[iChannel]->GetYaxis()->SetLabelSize(0.06);
-	  PmtPulseHeight_HistoLower[iChannel]->Draw();
-	  PmtPulseHeight_HistoUpper[iChannel]->SetStats(0);
+	  PmtPulseHeight_HistoInRange[iChannel]->GetXaxis()->SetRangeUser(0,200);
+	  PmtPulseHeight_HistoInRange[iChannel]->GetXaxis()->SetNdivisions(505);
+	  PmtPulseHeight_HistoInRange[iChannel]->GetXaxis()->SetLabelFont(42);
+	  PmtPulseHeight_HistoInRange[iChannel]->GetXaxis()->SetLabelSize(0.06);
+	  PmtPulseHeight_HistoInRange[iChannel]->GetYaxis()->SetNdivisions(505);
+	  PmtPulseHeight_HistoInRange[iChannel]->GetYaxis()->SetLabelFont(42);
+	  PmtPulseHeight_HistoInRange[iChannel]->GetYaxis()->SetLabelSize(0.06);
+	  PmtPulseHeight_HistoInRange[iChannel]->Draw();
+	  PmtPulseHeight_HistoLower[iChannel]->Draw("SAME");
 	  PmtPulseHeight_HistoUpper[iChannel]->Draw("SAME");
-	  pt[iChannel] = new TPaveText(0.23,0.65,0.99,0.86,"blNDC");
-	  pt[iChannel]->SetBorderSize(1);
-	  pt[iChannel]->SetLineColor(kBlack);
-	  pt[iChannel]->SetFillColor(kWhite);
-	  pt[iChannel]->SetTextFont(42);
-	  pt[iChannel]->SetTextSize(0.07);
-	  pt[iChannel]->AddText(Form("Selected events: %2.1f%%", PmtPulseHeight_HistoInTime[iChannel]->GetEntries()*1.0/PmtPulseHeight_Histo[iChannel]->GetEntries()*100));
-	  pt[iChannel]->Draw();
-	}*/
+	  
+	}
 }
 
 //\\//\\//\\//\\// SHOWPMTSIGNAL //\\//\\//\\//\\//\\//\\//
@@ -711,14 +781,19 @@ void ShowPmtSignal(Int_t SiRunNumber, Int_t evNumber) {
 	TTree* intree = (TTree*)infile->Get("Cherenkov");
 	
 	Double_t PmtPulseHeight[nChannelsPmt];    intree->SetBranchAddress("PmtPulseHeight",PmtPulseHeight);  
+	Int_t DgtzID[nChannelsPmt];		intree->SetBranchAddress("DgtzID",DgtzID);
 	
 	TH2F* h_PmtPulseHeight = new TH2F("h_PmtPulseHeight", Form("Pmt Signal, event %i of run %i",evNumber,SiRunNumber),8,0,8,8,0,8);
 	
+	Double_t IntegratedSignal=0;
 	intree->GetEntry(evNumber-1);
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
+	   if(DgtzID[iChannel]==31) PmtPulseHeight[iChannel]/=4;
 	   h_PmtPulseHeight->SetBinContent(xBin[iChannel],yBin[iChannel], PmtPulseHeight[iChannel]);
+	   IntegratedSignal+=PmtPulseHeight[iChannel];		    	
 	}
 	
+	cout << "IntegratedSignal = " << IntegratedSignal << endl;
 		
 	TLine* xLine[7];
 	TLine* yLine[7];
@@ -728,6 +803,7 @@ void ShowPmtSignal(Int_t SiRunNumber, Int_t evNumber) {
 	}
 	
 	TCanvas* c = new TCanvas("c","",750,750);
+	c->SetRightMargin(0.131406);
 	h_PmtPulseHeight->SetStats(0);
 	h_PmtPulseHeight->Draw("colz");
 	for(Int_t i=0; i<7; ++i) {
