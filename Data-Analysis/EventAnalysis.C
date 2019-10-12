@@ -62,8 +62,10 @@ const Int_t nChannelsPmt = 26; // or 26
 const Int_t activeChannels[26] = {21,22,29,30,37,38,45,46,5,6,13,14,53,54,61,62,40,39,32,31,24,23,16,15,7,8};
 //(x,y) bin numbers corresponding to the active channels of the Pmt
 //			21 22 29 30 37 38 45 46  5  6 13 14 53 54 61 62 40 39 32 31 24 23 16 15  7  8
-const Int_t xBin[26] = { 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 8, 7, 8, 7, 8, 7, 8, 7, 7, 8};
-const Int_t yBin[26] = { 6, 6, 5, 5, 4, 4, 3, 3, 8, 8, 7, 7, 2, 2, 1, 1, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8};
+const Int_t xBin[26] = { 3, 3, 4, 4, 5, 5, 6, 6, 1, 1, 2, 2, 7, 7, 8, 8, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1};
+const Int_t yBin[26] = { 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 8, 7, 8, 7, 8, 7, 8, 7, 7, 8};
+
+const Double_t PmtPulseHeight_thr[26] = {30,30,30,30,30,30,40,50,100,100,120,70,80,70,70,40,60,40,70,70,70,70,70,20,30};
 //////run300128
 const Double_t xcenterRadiator = 4.96292;
 const Double_t ycenterRadiator = 3.97302;
@@ -104,6 +106,7 @@ void ShowPmtSignal(Int_t SiRunNumber, Int_t evNumber);
 void PrintEventOnFile(Int_t SiRunNumber, Int_t EvNumber);
 void FillEvHisto(TTree* intree, Int_t ev, TH2F* h2_Dgtz20, TH2F* h2_Dgtz25, TH2F* h2_Dgtz31, TH2F* h2_all, Int_t norm);
 void CumPmtSignal(Int_t SiRunNumber, Int_t mod, Int_t ev);
+void DrawLegend();
 
 //\\//\\//\\//\\// RUNSTATSPMT //\\//\\//\\//\\//\\//\\//
 //See the time spectrum and PH spectrum of PMT active channels and select events in a particular time window
@@ -130,14 +133,14 @@ void RunStatsPmt(Int_t SiRunNumber) {
 	TH1F* PmtPulseHeight_HistoInTime[nChannelsPmt];
 	
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
-		PmtTime_Histo[iChannel] = new TH1F(Form("PmtTime_%i",iChannel),Form("ch %i Time [a.u.]",activeChannels[iChannel]),50,50,250);
+		PmtTime_Histo[iChannel] = new TH1F(Form("PmtTime_%i",iChannel),Form("ch %i Time [ADC counts]",activeChannels[iChannel]),50,50,250);
 		PmtTime_Histo[iChannel]->SetFillColor(kAzure-8);
 		PmtTime_Histo[iChannel]->SetLineColor(kAzure-8);
-		PmtPulseHeight_Histo[iChannel] = new TH1F(Form("PmtPulseHeight_Histo_%i",iChannel),Form("ch %i Pulse Height [a.u.]",activeChannels[iChannel]),200,0,1000);
+		PmtPulseHeight_Histo[iChannel] = new TH1F(Form("PmtPulseHeight_Histo_%i",iChannel),Form("ch %i Pulse Height [ADC counts]",activeChannels[iChannel]),200,0,1000);
 		PmtPulseHeight_Histo[iChannel]->SetLineColor(kBlue+2);
 		PmtPulseHeight_Histo[iChannel]->SetFillColor(kBlue+2);
 		PmtPulseHeight_Histo[iChannel]->SetFillStyle(3003);
-		PmtPulseHeight_HistoInTime[iChannel] = new TH1F(Form("PmtPulseHeight_HistoInTime_%i",iChannel),Form("ch %i Pulse Height [a.u.]",activeChannels[iChannel]),200,0,1000);
+		PmtPulseHeight_HistoInTime[iChannel] = new TH1F(Form("PmtPulseHeight_HistoInTime_%i",iChannel),Form("ch %i Pulse Height [ADC counts]",activeChannels[iChannel]),200,0,1000);
 		PmtPulseHeight_HistoInTime[iChannel]->SetLineColor(kRed-9);
 		PmtPulseHeight_HistoInTime[iChannel]->SetFillColor(kRed-9);
 	}
@@ -174,7 +177,7 @@ void RunStatsPmt(Int_t SiRunNumber) {
 		//if(nChannelsPmt==26&&chCounter>=17) cout << "High PH in " << chCounter << " channels. Event number = " << evNumber << endl;
 	}
 	
-	gStyle->SetTitleFontSize(0.07);
+	//gStyle->SetTitleFontSize(0.76);
 	
 	TLine* line_lowerBound[nChannelsPmt]; 
 	TLine* line_upperBound[nChannelsPmt];
@@ -252,6 +255,11 @@ void RunStatsPmt(Int_t SiRunNumber) {
     		pt[iChannel]->AddText(Form("Selected events: %2.1f%%", PmtPulseHeight_HistoInTime[iChannel]->GetEntries()*1.0/PmtPulseHeight_Histo[iChannel]->GetEntries()*100));
     		pt[iChannel]->Draw();
 	}
+	c_ph->cd(27);
+	TLegend* leg = new TLegend(0.0,0.08,0.95,0.6,NULL,"brNDC");
+	leg->AddEntry(PmtPulseHeight_Histo[0],"All signals");
+	leg->AddEntry(PmtPulseHeight_HistoInTime[0], "In time signals");
+	leg->Draw();
 	
 	return;
 }
@@ -281,7 +289,9 @@ void xyrad_histo(Int_t SiRunNumber,
   	TH2F* xyRadiator_Histo = new TH2F("xyRadiator_Histo", "Before cuts", 50, 0, 10, 50, 0, 10);
   	TH2F* xyRadiator_HistoInRange = new TH2F("xyRadiator_HistoInRange", "After cuts", 50, 0, 10, 50, 0, 10);
   	TH2F* xyRadiator_HistoBkg = new TH2F("xyRadiator_HistoBkg","Background hits on radiator plane",50,0,10,50,0,10);
-  	TH2F* xyRadiator_HistoWeighted = new TH2F("xyRadiator_HistoWeighted","",50,0,10,50,0,10);
+  	TH1F* xRadiator_HistoWeighted = new TH1F("xRadiator_HistoWeighted", "", 50, 0, 10);
+  	TH1F* yRadiator_HistoWeighted = new TH1F("yRadiator_HistoWeighted", "", 50, 0, 10);
+  	TH2F* xyRadiator_HistoWeighted = new TH2F("xyRadiator_HistoWeighted","Weighted (x_{rad},y_{rad}) distribution",50,0,10,50,0,10);
   	//hit on Silicon detetcors
   	TH1F* x0Hit_Histo = new TH1F("x0Hit_Histo", "x Hit of UPPER Si", 50, 0, 10);
   	TH1F* x1Hit_Histo = new TH1F("x1Hit_Histo", "x Hit of LOWER Si", 50, 0, 10);
@@ -306,13 +316,18 @@ void xyrad_histo(Int_t SiRunNumber,
   	TH2F* xy0_HistoBkg = new TH2F("xy0_HistoBkg","Background hits on UPPER Si",50,0,10,50,0,10);
   	TH2F* xy1_HistoBkg = new TH2F("xy1_HistoBkg","Background hits on LOWER Si",50,0,10,50,0,10);
   	//theta
-  	TH1F* theta_Histo = new TH1F("theta_Histo", "cos(#theta)", 50, 0.9, 1);
-  	TH1F* theta_HistoInAngularRange = new TH1F("theta_HistoInAngularRange", "", 50, 0.9, 1);
-  	TH2F* thetaZX_vs_PmtIntegratedPulseHeight = new TH2F("thetaZX_vs_PmtIntegratedPulseHeight","",50,500,4000,50,-0.5,0.5);
-  	TH2F* thetaZY_vs_PmtIntegratedPulseHeight = new TH2F("thetaZY_vs_PmtIntegratedPulseHeight","",50,500,4000,50,-0.5,0.5);
-  	TH2F* thetaZX_vs_thetaZY = new TH2F("thetaZX_vs_thetaZY","",50,-0.5,0.5,50,-0.5,0.5);
-  	TH1F* thetaZX_HistoWeighted = new TH1F("thetaZX_HistoWeighted","",50,-0.5,0.5);
-  	TH1F* thetaZY_HistoWeighted = new TH1F("thetaZY_HistoWeighted","",50,-0.5,0.5);
+  	TH1F* theta_Histo = new TH1F("theta_Histo", "cos(#theta)", 50, 0.95, 1);
+  	TH1F* theta_HistoInRange = new TH1F("theta_HistoInRange", "cos(#theta)", 50, 0.95, 1);
+  	TH1F* theta_HistoInSpacialRange = new TH1F("theta_HistoInSpacialRange", "", 50, 0.95, 1);
+  	TH1F* theta_HistoInAngularRange = new TH1F("theta_HistoInAngularRange", "", 50, 0.95, 1);
+  	TH2F* thetaZX_vs_PmtIntegratedPulseHeight = new TH2F("thetaZX_vs_PmtIntegratedPulseHeight","sin(#theta_{zx}) vs Integrated Pmt PH",50,500,4000,50,-0.5,0.5);
+  	TH2F* thetaZY_vs_PmtIntegratedPulseHeight = new TH2F("thetaZY_vs_PmtIntegratedPulseHeight","sin(#theta_{zy}) vs Integrated Pmt PH",50,500,4000,50,-0.5,0.5);
+  	TH2F* thetaZX_vs_thetaZY_Histo = new TH2F("thetaZX_vs_thetaZY_Histo","sin(#theta_{zy}) vs sin(#theta_{zx})",50,-0.5,0.5,50,-0.5,0.5);
+  	TH2F* thetaZX_vs_thetaZY_HistoWeighted = new TH2F("thetaZX_vs_thetaZY_HistoWeighted","Weighted sin(#theta_{zy}) vs sin(#theta_{zx})",50,-0.5,0.5,50,-0.3,0.3);
+  	TH1F* thetaZX_Histo = new TH1F("thetaZX_Histo", "sin(#theta_{zx})", 50,-0.5,0.5);
+  	TH1F* thetaZY_Histo = new TH1F("thetaZY_Histo", "sin(#theta_{zy})", 50,-0.5,0.5);
+  	TH1F* thetaZX_HistoWeighted = new TH1F("thetaZX_HistoWeighted","sin(#theta_{zx})",50,-0.5,0.5);
+  	TH1F* thetaZY_HistoWeighted = new TH1F("thetaZY_HistoWeighted","sin(#theta_{zy})",50,-0.5,0.5);
   	//trigger
   	TH1F* trgUp_Histo  = new TH1F("trgUp_Histo","Scintillator UP",50,0,700);
   	TH1F* trgUp_HistoInSpacialRange  = new TH1F("trgUp_HistoInSpacialRange","",50,0,700);
@@ -334,14 +349,14 @@ void xyrad_histo(Int_t SiRunNumber,
   	TH1F* trgSignal_HistoInAngularRange  = new TH1F("trgSignal_HistoInAngularRange","",50,0,700);
   	TH1F* trgSignal_HistoInRange  = new TH1F("trgSignal_HistoInRange","",50,0,700);
   	// Pmt pulse height
-  	TH1F* PmtIntegratedPulseHeight_HistoInRange = new TH1F("PmtIntegratedPulseHeight_HistoinRange","Integrated Pmt PH",70,500,15000);
+  	TH1F* PmtIntegratedPulseHeight_HistoInRange = new TH1F("PmtIntegratedPulseHeight_HistoinRange","Bkg Dinode PH and Signal Pmt PH",70,500,15000);
   	TH1F* PmtIntegratedPulseHeight_HistoLower = new TH1F("PmtIntegratedPulseHeight_HistoLower","",70,500,15000);
   	TH1F* PmtIntegratedPulseHeight_HistoUpper = new TH1F("PmtIntegratedPulseHeight_HistoUpper","",70,500,15000);
   	TH1F* PmtPulseHeight_HistoInRange[nChannelsPmt];
   	TH1F* PmtPulseHeight_HistoLower[nChannelsPmt];
   	TH1F* PmtPulseHeight_HistoUpper[nChannelsPmt];
   	for(Int_t iChannel = 0; iChannel < nChannelsPmt; iChannel++) {
-  		PmtPulseHeight_HistoInRange[iChannel] = new TH1F(Form("PmtPulseHeight_HistoInRange_%i",iChannel),Form("ch %i Pulse Height [a.u.]",activeChannels[iChannel]),200,0,1000);
+  		PmtPulseHeight_HistoInRange[iChannel] = new TH1F(Form("PmtPulseHeight_HistoInRange_%i",iChannel),Form("ch %i Pulse Height [ADC counts]",activeChannels[iChannel]),200,0,1000);
   		PmtPulseHeight_HistoInRange[iChannel]->SetStats(0);
   		PmtPulseHeight_HistoInRange[iChannel]->SetLineColor(kRed-10);
   		PmtPulseHeight_HistoInRange[iChannel]->SetFillColor(kRed-10);
@@ -406,7 +421,23 @@ void xyrad_histo(Int_t SiRunNumber,
     			Dinode_Histo->Fill(Dinode);
     			trgSignal_Histo->Fill(trgDown+Dinode);
     			
-    			
+			Double_t IntegratedSignal=0;
+	   		for(Int_t iChannel=0; iChannel<nChannelsPmt; iChannel++) {
+			 	if(DgtzID[iChannel] == 31) PulseHeight[iChannel]/=4;
+			      	
+			      	IntegratedSignal+=PulseHeight[iChannel];
+			}
+    			xRadiator_HistoWeighted->Fill(xRadiator,IntegratedSignal);
+    			yRadiator_HistoWeighted->Fill(yRadiator,IntegratedSignal);
+    			xyRadiator_HistoWeighted->Fill(xRadiator,yRadiator,IntegratedSignal);
+			thetaZX_vs_PmtIntegratedPulseHeight->Fill(IntegratedSignal,( xHit[1] - xHit[0])/Sidistx);
+			thetaZY_vs_PmtIntegratedPulseHeight->Fill(IntegratedSignal,( yHit[1] - yHit[0])/Sidisty);
+			thetaZX_Histo->Fill(( xHit[1] - xHit[0])/Sidistx);
+			thetaZY_Histo->Fill(( yHit[1] - yHit[0])/Sidisty);
+			thetaZX_HistoWeighted->Fill(( xHit[1] - xHit[0])/Sidistx, IntegratedSignal);
+			thetaZY_HistoWeighted->Fill(( yHit[1] - yHit[0])/Sidisty, IntegratedSignal);
+			thetaZX_vs_thetaZY_Histo->Fill(( xHit[1] - xHit[0])/Sidistx,( yHit[1] - yHit[0])/Sidisty);
+    			thetaZX_vs_thetaZY_HistoWeighted->Fill(( xHit[1] - xHit[0])/Sidistx,( yHit[1] - yHit[0])/Sidisty, IntegratedSignal);
     			// CUT on tracks direction
     			if (theta > thr_theta) {
     				x0Hit_HistoInAngularRange->Fill(xHit[0]);
@@ -429,24 +460,14 @@ void xyrad_histo(Int_t SiRunNumber,
     				y1Hit_HistoInSpacialRange->Fill(yHit[1]);
 	   			xRadiator_HistoInSpacialRange->Fill(xRadiator);
 	   			yRadiator_HistoInSpacialRange->Fill(yRadiator);
+	   			theta_HistoInSpacialRange->Fill(theta);
 	   			trgUp_HistoInSpacialRange->Fill(trgUp);
 	   			trgDown_HistoInSpacialRange->Fill(trgDown);
     				Dinode_HistoInSpacialRange->Fill(Dinode);
     				trgSignal_HistoInSpacialRange->Fill(trgDown+Dinode);
 			}
 			
-			Double_t IntegratedSignal=0;
-	   		for(Int_t iChannel=0; iChannel<nChannelsPmt; iChannel++) {
-			 	if(DgtzID[iChannel] == 31) PulseHeight[iChannel]/=4;
-			      	
-			      	IntegratedSignal+=PulseHeight[iChannel];
-			}
-			xyRadiator_HistoWeighted->Fill(xRadiator,yRadiator,IntegratedSignal);
-			thetaZX_vs_PmtIntegratedPulseHeight->Fill(IntegratedSignal,( xHit[1] - xHit[0])/Sidistx);
-			thetaZY_vs_PmtIntegratedPulseHeight->Fill(IntegratedSignal,( yHit[1] - yHit[0])/Sidisty);
-			thetaZX_HistoWeighted->Fill(( xHit[1] - xHit[0])/Sidistx, IntegratedSignal);
-			thetaZY_HistoWeighted->Fill(( yHit[1] - yHit[0])/Sidisty, IntegratedSignal);
-			thetaZX_vs_thetaZY->Fill(( xHit[1] - xHit[0])/Sidistx,( yHit[1] - yHit[0])/Sidisty,IntegratedSignal);
+			
     			// CUT on track direction & spacial distribution of hits
     			if (theta > thr_theta && (pow((xcenterRadiator - xRadiator),2)+pow((ycenterRadiator - yRadiator),2))<=pow(thr_Radiator,2) && abs(5 - xHit[0]) < thr_x0 && abs(5 - yHit[0]) < thr_y0 ) {
 	   			x0Hit_HistoInRange->Fill(xHit[0]);
@@ -458,6 +479,8 @@ void xyrad_histo(Int_t SiRunNumber,
 	   			xRadiator_HistoInRange->Fill(xRadiator);
 	   			yRadiator_HistoInRange->Fill(yRadiator);
 	   			xyRadiator_HistoInRange->Fill(xRadiator,yRadiator);
+	   			theta_HistoInRange->Fill(theta);
+	   			//thetaZX_vs_thetaZY_HistoInRange->Fill(( xHit[1] - xHit[0])/Sidistx,( yHit[1] - yHit[0])/Sidisty);
 	   			trgUp_HistoInRange->Fill(trgUp);
 	   			trgDown_HistoInRange->Fill(trgDown);
     				Dinode_HistoInRange->Fill(Dinode);
@@ -504,11 +527,13 @@ void xyrad_histo(Int_t SiRunNumber,
 	gStyle->SetPalette(kCherry);
 	TColor::InvertPalette();
 	//In this Canvas I plot the distribution of the muons on the xy plane of the radiator provided some filters
-  	TCanvas* c = new TCanvas("c","",1125,750);
-  	c->Divide(3,2);
+  	TCanvas* c = new TCanvas("c","",750,750);
+  	c->Divide(2,2);
 	c->cd(1);
 	xRadiator_Histo->SetStats(0);
 	xRadiator_Histo->SetLineColor(kBlack);
+	xRadiator_Histo->GetXaxis()->SetTitle("x_{rad} [cm]");
+	xRadiator_Histo->GetYaxis()->SetTitle("Counts");
   	xRadiator_Histo->Draw();
   	xRadiator_HistoInSpacialRange->SetLineColor(kBlue);
   	xRadiator_HistoInSpacialRange->Draw("same");
@@ -519,6 +544,8 @@ void xyrad_histo(Int_t SiRunNumber,
 	c->cd(2);
   	yRadiator_Histo->SetStats(0);
 	yRadiator_Histo->SetLineColor(kBlack);
+	yRadiator_Histo->GetXaxis()->SetTitle("y_{rad} [cm]");
+	yRadiator_Histo->GetYaxis()->SetTitle("Counts");
   	yRadiator_Histo->Draw();
   	yRadiator_HistoInSpacialRange->SetLineColor(kBlue);
   	yRadiator_HistoInSpacialRange->Draw("same");
@@ -526,13 +553,26 @@ void xyrad_histo(Int_t SiRunNumber,
   	yRadiator_HistoInAngularRange->Draw("same");
   	yRadiator_HistoInRange->SetLineColor(kRed);
   	yRadiator_HistoInRange->Draw("same");
-	c->cd(4);
+	c->cd(3);
 	xyRadiator_Histo->SetStats(0);
+	xyRadiator_Histo->GetXaxis()->SetTitle("x_{rad} [cm]");
+	xyRadiator_Histo->GetYaxis()->SetTitle("y_{rad} [cm]");
   	xyRadiator_Histo->Draw("colz");
-	c->cd(5);
+  	TPaveText* pt_rad = new TPaveText(0.1754679,0.6849711,0.8216355,0.8843931,"blNDC");
+	pt_rad->SetBorderSize(1);
+	pt_rad->SetLineColor(kBlack);
+	pt_rad->SetFillColor(kWhite);
+	pt_rad->SetTextFont(42);
+	pt_rad->SetTextSize(0.06);
+	pt_rad->AddText(Form("x^{0}_{rad} = (%1.2f #pm 0.02) cm",xcenterRadiator));
+	pt_rad->AddText(Form("y^{0}_{rad} = (%1.2f #pm 0.02) cm",ycenterRadiator));
+	pt_rad->Draw();
+  	c->cd(4);
 	xyRadiator_HistoInRange->SetStats(0);
+	xyRadiator_HistoInRange->GetXaxis()->SetTitle("x_{rad} [cm]");
+	xyRadiator_HistoInRange->GetYaxis()->SetTitle("y_{rad} [cm]");
   	xyRadiator_HistoInRange->Draw("colz");
-  	TPaveText* pt = new TPaveText(0.1754679,0.6111212,0.8216355,0.8106858,"blNDC");
+  	TPaveText* pt = new TPaveText(0.1754679,0.6849711,0.8216355,0.8843931,"blNDC");
 	pt->SetBorderSize(1);
 	pt->SetLineColor(kBlack);
 	pt->SetFillColor(kWhite);
@@ -540,15 +580,15 @@ void xyrad_histo(Int_t SiRunNumber,
 	pt->SetTextSize(0.06);
 	pt->AddText(Form("Selected events: %zu (%2.1f%%)",selectedEvents.size(),selectedEvents.size()*100.0/intree->GetEntries()));
 	pt->Draw();
-	c->cd(6);
-	xyRadiator_HistoWeighted->Draw("colz");
-	
+  	
   	//In this canvas I plot selected hit on the UPPER and LOWER SI
   	TCanvas* c1 = new TCanvas("c1","",750,750);
   	c1->Divide(2,2);
 	c1->cd(1);
 	x0Hit_Histo->SetStats(0);
 	x0Hit_Histo->SetLineColor(kBlack);
+	x0Hit_Histo->GetXaxis()->SetTitle("x UPPER Si [cm]");
+	x0Hit_Histo->GetYaxis()->SetTitle("Counts");
 	x0Hit_Histo->Draw();
 	x0Hit_HistoInSpacialRange->SetLineColor(kBlue);
   	x0Hit_HistoInSpacialRange->Draw("same");
@@ -559,6 +599,8 @@ void xyrad_histo(Int_t SiRunNumber,
   	c1->cd(2);
   	y0Hit_Histo->SetStats(0);
 	y0Hit_Histo->SetLineColor(kBlack);
+	y0Hit_Histo->GetXaxis()->SetTitle("y UPPER Si [cm]");
+	y0Hit_Histo->GetYaxis()->SetTitle("Counts");
 	y0Hit_Histo->Draw();
 	y0Hit_HistoInSpacialRange->SetLineColor(kBlue);
   	y0Hit_HistoInSpacialRange->Draw("same");
@@ -567,8 +609,23 @@ void xyrad_histo(Int_t SiRunNumber,
   	y0Hit_HistoInRange->SetLineColor(kRed);
   	y0Hit_HistoInRange->Draw("same");
   	c1->cd(3);
-  	x1Hit_Histo->SetStats(0);
+  	xy0_Histo->SetStats(0);
+  	xy0_Histo->GetXaxis()->SetTitle("x UPPER Si [cm]");
+  	xy0_Histo->GetYaxis()->SetTitle("y UPPER Si [cm]");
+	xy0_Histo->Draw("colz");
+  	c1->cd(4);
+  	xy0_HistoInRange->SetStats(0);
+  	xy0_HistoInRange->GetXaxis()->SetTitle("x UPPER Si [cm]");
+  	xy0_HistoInRange->GetYaxis()->SetTitle("y UPPER Si [cm]");
+	xy0_HistoInRange->Draw("colz");
+	
+  	TCanvas* c2 = new TCanvas("c2","",750,750);
+  	c2->Divide(2,2);
+	c2->cd(1);
+	x1Hit_Histo->SetStats(0);
 	x1Hit_Histo->SetLineColor(kBlack);
+	x1Hit_Histo->GetXaxis()->SetTitle("x LOWER Si [cm]");
+	x1Hit_Histo->GetYaxis()->SetTitle("Counts");
 	x1Hit_Histo->Draw();
 	x1Hit_HistoInSpacialRange->SetLineColor(kBlue);
   	x1Hit_HistoInSpacialRange->Draw("same");
@@ -576,9 +633,11 @@ void xyrad_histo(Int_t SiRunNumber,
   	x1Hit_HistoInAngularRange->Draw("same");
   	x1Hit_HistoInRange->SetLineColor(kRed);
   	x1Hit_HistoInRange->Draw("same");
-  	c1->cd(4);
-  	y1Hit_Histo->SetStats(0);
+	c2->cd(2);
+	y1Hit_Histo->SetStats(0);
 	y1Hit_Histo->SetLineColor(kBlack);
+	y1Hit_Histo->GetXaxis()->SetTitle("y LOWER Si [cm]");
+	y1Hit_Histo->GetYaxis()->SetTitle("Counts");
 	y1Hit_Histo->Draw();
 	y1Hit_HistoInSpacialRange->SetLineColor(kBlue);
   	y1Hit_HistoInSpacialRange->Draw("same");
@@ -586,20 +645,15 @@ void xyrad_histo(Int_t SiRunNumber,
   	y1Hit_HistoInAngularRange->Draw("same");
   	y1Hit_HistoInRange->SetLineColor(kRed);
   	y1Hit_HistoInRange->Draw("same");
-  	
-  	TCanvas* c2 = new TCanvas("c2","",750,750);
-  	c2->Divide(2,2);
-	c2->cd(1);
-	xy0_Histo->SetStats(0);
-	xy0_Histo->Draw("colz");
-	c2->cd(2);
-	xy0_HistoInRange->SetStats(0);
-	xy0_HistoInRange->Draw("colz");
 	c2->cd(3);
 	xy1_Histo->SetStats(0);
+	xy1_Histo->GetXaxis()->SetTitle("x LOWER Si [cm]");
+  	xy1_Histo->GetYaxis()->SetTitle("y LOWER Si [cm]");
 	xy1_Histo->Draw("colz");
 	c2->cd(4);
 	xy1_HistoInRange->SetStats(0);
+	xy1_HistoInRange->GetXaxis()->SetTitle("x LOWER Si [cm]");
+  	xy1_HistoInRange->GetYaxis()->SetTitle("y LOWER Si [cm]");
 	xy1_HistoInRange->Draw("colz");
   	
 	TCanvas* c3 = new TCanvas("c3", "", 750, 750);
@@ -617,19 +671,23 @@ void xyrad_histo(Int_t SiRunNumber,
   	c4->Divide(2,2);
   	c4->cd(1);
   	c4->cd(1)->SetLogy();
-  	trgUp_Histo->SetStats(0);
-	trgUp_Histo->SetLineColor(kBlack);
-	trgUp_Histo->Draw();
-	trgUp_HistoInSpacialRange->SetLineColor(kBlue);
-  	trgUp_HistoInSpacialRange->Draw("same");
-  	trgUp_HistoInAngularRange->SetLineColor(kGreen);
-  	trgUp_HistoInAngularRange->Draw("same");
-  	trgUp_HistoInRange->SetLineColor(kRed);
-  	trgUp_HistoInRange->Draw("same");
-	c4->cd(2);
+  	Dinode_Histo->SetStats(0);
+	Dinode_Histo->SetLineColor(kBlack);
+	Dinode_Histo->GetXaxis()->SetTitle("[ADC counts]");
+	Dinode_Histo->GetYaxis()->SetTitle("Counts");
+	Dinode_Histo->Draw();
+	Dinode_HistoInSpacialRange->SetLineColor(kBlue);
+  	Dinode_HistoInSpacialRange->Draw("same");
+  	Dinode_HistoInAngularRange->SetLineColor(kGreen);
+  	Dinode_HistoInAngularRange->Draw("same");
+  	Dinode_HistoInRange->SetLineColor(kRed);
+  	Dinode_HistoInRange->Draw("same");
+  	c4->cd(2);
 	c4->cd(2)->SetLogy();
 	trgDown_Histo->SetStats(0);
 	trgDown_Histo->SetLineColor(kBlack);
+	trgDown_Histo->GetXaxis()->SetTitle("[ADC counts]");
+	trgDown_Histo->GetYaxis()->SetTitle("Counts");
 	trgDown_Histo->Draw();
 	trgDown_HistoInSpacialRange->SetLineColor(kBlue);
   	trgDown_HistoInSpacialRange->Draw("same");
@@ -639,19 +697,23 @@ void xyrad_histo(Int_t SiRunNumber,
   	trgDown_HistoInRange->Draw("same");
   	c4->cd(3);
   	c4->cd(3)->SetLogy();
-  	Dinode_Histo->SetStats(0);
-	Dinode_Histo->SetLineColor(kBlack);
-	Dinode_Histo->Draw();
-	Dinode_HistoInSpacialRange->SetLineColor(kBlue);
-  	Dinode_HistoInSpacialRange->Draw("same");
-  	Dinode_HistoInAngularRange->SetLineColor(kGreen);
-  	Dinode_HistoInAngularRange->Draw("same");
-  	Dinode_HistoInRange->SetLineColor(kRed);
-  	Dinode_HistoInRange->Draw("same");
+  	trgUp_Histo->SetStats(0);
+	trgUp_Histo->SetLineColor(kBlack);
+	trgUp_Histo->GetXaxis()->SetTitle("[ADC counts]");
+	trgUp_Histo->GetYaxis()->SetTitle("Counts");
+	trgUp_Histo->Draw();
+	trgUp_HistoInSpacialRange->SetLineColor(kBlue);
+  	trgUp_HistoInSpacialRange->Draw("same");
+  	trgUp_HistoInAngularRange->SetLineColor(kGreen);
+  	trgUp_HistoInAngularRange->Draw("same");
+  	trgUp_HistoInRange->SetLineColor(kRed);
+  	trgUp_HistoInRange->Draw("same");
   	c4->cd(4);
   	c4->cd(4)->SetLogy();
   	trgSignal_Histo->SetStats(0);
 	trgSignal_Histo->SetLineColor(kBlack);
+	trgSignal_Histo->GetXaxis()->SetTitle("[ADC counts]");
+	trgSignal_Histo->GetYaxis()->SetTitle("Counts");
 	trgSignal_Histo->Draw();
 	trgSignal_HistoInSpacialRange->SetLineColor(kBlue);
   	trgSignal_HistoInSpacialRange->Draw("same");
@@ -665,6 +727,7 @@ void xyrad_histo(Int_t SiRunNumber,
 	c5->cd(1);
 	Dinode_HistoLower->Scale(1.0/Dinode_HistoLower->Integral());
 	Dinode_HistoLower->GetYaxis()->SetRangeUser(0.,0.2);
+	Dinode_HistoLower->GetXaxis()->SetTitle("[ADC counts]");
 	Dinode_HistoLower->SetStats(0);
 	Dinode_HistoLower->SetLineColor(kBlue+3);
 	Dinode_HistoLower->SetFillColor(kBlue+3);
@@ -675,6 +738,10 @@ void xyrad_histo(Int_t SiRunNumber,
 	Dinode_HistoUpper->SetFillColor(kBlue-8);
 	Dinode_HistoUpper->SetFillStyle(3005);
   	Dinode_HistoUpper->Draw("SAME HIST");
+  	TLegend* leg_bkg = new TLegend(0.5177819,0.6243953,0.8980413,0.8995525,NULL,"brNDC");
+  	leg_bkg->AddEntry(Dinode_HistoLower, "Lower Bkg");
+  	leg_bkg->AddEntry(Dinode_HistoUpper, "Upper Bkg");
+  	leg_bkg->Draw();
   	c5->cd(2);
 	PmtIntegratedPulseHeight_HistoInRange->Scale(1.0/PmtIntegratedPulseHeight_HistoInRange->Integral());
 	PmtIntegratedPulseHeight_HistoInRange->GetYaxis()->SetRangeUser(0.,0.2);
@@ -683,6 +750,8 @@ void xyrad_histo(Int_t SiRunNumber,
   	PmtIntegratedPulseHeight_HistoInRange->SetFillColor(kRed-10);
   	//PmtIntegratedPulseHeight_HistoInRange->SetFillStyle(3003);
   	PmtIntegratedPulseHeight_HistoInRange->Draw("HIST");
+  	PmtIntegratedPulseHeight_HistoInRange->GetXaxis()->SetRangeUser(0,4000);
+  	PmtIntegratedPulseHeight_HistoInRange->GetXaxis()->SetTitle("[ADC counts]");
   	PmtIntegratedPulseHeight_HistoLower->Scale(1.0/PmtIntegratedPulseHeight_HistoLower->Integral());
   	PmtIntegratedPulseHeight_HistoLower->SetLineColor(kBlue+3);
   	PmtIntegratedPulseHeight_HistoLower->SetFillColor(kBlue+3);
@@ -693,11 +762,19 @@ void xyrad_histo(Int_t SiRunNumber,
   	PmtIntegratedPulseHeight_HistoUpper->SetFillColor(kBlue-8);
   	PmtIntegratedPulseHeight_HistoUpper->SetFillStyle(3005);
   	PmtIntegratedPulseHeight_HistoUpper->Draw("SAME HIST");
+  	TLegend* leg_bkg_sig = new TLegend(0.3372271,0.5990264,0.8980413,0.8983732,NULL,"brNDC");
+  	leg_bkg_sig->AddEntry(Dinode_HistoLower, "Lower Bkg");
+  	leg_bkg_sig->AddEntry(Dinode_HistoUpper, "Upper Bkg");
+  	leg_bkg_sig->AddEntry(PmtIntegratedPulseHeight_HistoInRange, "Selected events");
+  	leg_bkg_sig->Draw();
+  	
   	
   	TCanvas* c6 = new TCanvas("c6","",750,750);
   	c6->Divide(2,2);
 	c6->cd(1);
 	xy0_HistoBkg->SetStats(0);
+	xy0_HistoBkg->GetXaxis()->SetTitle("x UPPER Si [cm]");
+	xy0_HistoBkg->GetYaxis()->SetTitle("y UPPER Si [cm]");
 	xy0_HistoBkg->Draw("colz");
 	TPaveText* ptUpper = new TPaveText(0.1434938,0.6569323,0.3858066,0.720615,"blNDC");
 	ptUpper->SetBorderSize(1);
@@ -719,9 +796,13 @@ void xyrad_histo(Int_t SiRunNumber,
 	ptLower->Draw();
 	c6->cd(2);
 	xy1_HistoBkg->SetStats(0);
+	xy1_HistoBkg->GetXaxis()->SetTitle("x UPPER Si [cm]");
+	xy1_HistoBkg->GetYaxis()->SetTitle("y UPPER Si [cm]");
 	xy1_HistoBkg->Draw("colz");
 	c6->cd(3);
 	xyRadiator_HistoBkg->SetStats(0);
+	xyRadiator_HistoBkg->GetXaxis()->SetTitle("x_{rad} [cm]");
+	xyRadiator_HistoBkg->GetYaxis()->SetTitle("y_{rad} [cm]");
 	xyRadiator_HistoBkg->Draw("colz");
 	TLine* line1=new TLine(xcenterRadiator-3,  ycenterRadiator,xcenterRadiator+3,  ycenterRadiator);
 	line1->SetLineColor(kRed-10); line1->SetLineWidth(2); line1->Draw("SAME");
@@ -760,27 +841,35 @@ void xyrad_histo(Int_t SiRunNumber,
 	ptLowerRadiator->SetTextColor(kBlue+3);
 	ptLowerRadiator->AddText("Lower Bkg");
 	ptLowerRadiator->Draw();
+  	c6->cd(4);
+  	PmtIntegratedPulseHeight_HistoInRange->Draw("HIST");
+  	PmtIntegratedPulseHeight_HistoLower->Draw("SAME HIST");
+  	PmtIntegratedPulseHeight_HistoUpper->Draw("SAME HIST");
+  	leg_bkg_sig->Draw();
   	
-  	TCanvas* c7 = new TCanvas("c8","",1500,750);
-  	c7->Divide(2,2);
+  	TCanvas* c7 = new TCanvas("c7","",750,375);
+  	c7->Divide(2,1);
   	c7->cd(1);
   	theta_Histo->SetStats(0);
 	theta_Histo->SetLineColor(kBlack);
+	theta_Histo->GetXaxis()->SetTitle("cos(#theta)");
+	theta_Histo->GetYaxis()->SetTitle("Counts");
   	theta_Histo->Draw();
   	theta_HistoInAngularRange->SetLineColor(kGreen);
   	theta_HistoInAngularRange->Draw("same");
+  	theta_HistoInSpacialRange->SetLineColor(kBlue);
+  	theta_HistoInSpacialRange->Draw("same");
+  	theta_HistoInRange->SetLineColor(kRed);
+  	theta_HistoInRange->Draw("same");
   	c7->cd(2);
-  	thetaZX_vs_thetaZY->Draw("colz");
-  	c7->cd(3);
-  	thetaZX_HistoWeighted->Draw("HIST");
-  	//thetaZX_vs_PmtIntegratedPulseHeight->Draw("LEGO2Z");
-  	c7->cd(4);
-  	thetaZY_HistoWeighted->Draw("HIST");
-  	//thetaZY_vs_PmtIntegratedPulseHeight->Draw("LEGO2Z");
+  	thetaZX_vs_thetaZY_Histo->SetStats(0);
+  	thetaZX_vs_thetaZY_Histo->GetXaxis()->SetTitle("sin(#theta_{zx})");
+  	thetaZX_vs_thetaZY_Histo->GetYaxis()->SetTitle("sin(#theta_{zy})");
+  	thetaZX_vs_thetaZY_Histo->Draw("colz");
   	
-  	gStyle->SetTitleFontSize(0.07);
+  	//gStyle->SetTitleFontSize(0.7);
   	
-	TCanvas* c8 = new TCanvas("c7","",1500,750);
+	TCanvas* c8 = new TCanvas("c8","",1500,750);
 	c8->Divide(7,4);
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
 	  c8->cd(iChannel+1);
@@ -798,6 +887,79 @@ void xyrad_histo(Int_t SiRunNumber,
 	  PmtPulseHeight_HistoUpper[iChannel]->Draw("SAME");
 	  
 	}
+	c8->cd(27);
+	TLegend* leg_ph = new TLegend(0.0,0.0,0.95,0.8,NULL,"brNDC");
+	leg_ph->AddEntry(PmtPulseHeight_HistoLower[0],"Lower Bkg");
+	leg_ph->AddEntry(PmtPulseHeight_HistoUpper[0],"Upper Bkg");
+	leg_ph->AddEntry(PmtPulseHeight_HistoInRange[0], "Selected Events");
+	leg_ph->Draw();
+	
+	TCanvas* c9 = new TCanvas("c9","",375,375);
+	xyRadiator_HistoWeighted->SetStats(0);
+	xyRadiator_HistoWeighted->GetXaxis()->SetTitle("x_{rad} [cm]");
+	xyRadiator_HistoWeighted->GetYaxis()->SetTitle("y_{rad} [cm]");
+	xyRadiator_HistoWeighted->Draw("colz");
+	TPaveText* pt_radw = new TPaveText(0.1179625,0.6849711,0.8873995,0.8843931,"blNDC");
+	pt_radw->SetBorderSize(1);
+	pt_radw->SetLineColor(kBlack);
+	pt_radw->SetFillColor(kWhite);
+	pt_radw->SetTextFont(42);
+	pt_radw->SetTextSize(0.06);
+	pt_radw->AddText("Weighted x^{0}_{rad} = (5.56 #pm 0.03) cm");
+	pt_radw->AddText("Weighted y^{0}_{rad} = (3.88 #pm 0.03) cm");
+	pt_radw->Draw();
+	
+	TCanvas* c10 = new TCanvas("c10","",750,750);
+  	c10->Divide(2,2);
+  	c10->cd(1);
+  	c10->cd(1)->SetLeftMargin(0.1111111);
+  	thetaZX_vs_PmtIntegratedPulseHeight->SetStats(0);
+  	thetaZX_vs_PmtIntegratedPulseHeight->GetXaxis()->SetTitle("Integrated Pmt PH [ADC counts]");
+  	thetaZX_vs_PmtIntegratedPulseHeight->GetYaxis()->SetTitle("sin(#theta_{zx})");
+  	thetaZX_vs_PmtIntegratedPulseHeight->Draw("colz");
+  	c10->cd(2);
+  	c10->cd(2)->SetLeftMargin(0.1111111);
+  	thetaZY_vs_PmtIntegratedPulseHeight->SetStats(0);
+  	thetaZY_vs_PmtIntegratedPulseHeight->GetXaxis()->SetTitle("Integrated Pmt PH [ADC counts]");
+  	thetaZY_vs_PmtIntegratedPulseHeight->GetYaxis()->SetTitle("sin(#theta_{zy})");
+  	thetaZY_vs_PmtIntegratedPulseHeight->Draw("colz");
+  	c10->cd(3);
+  	c10->cd(3)->SetLeftMargin(0.1111111);
+  	thetaZX_Histo->SetStats(0);
+  	thetaZX_Histo->SetLineColor(kBlack);
+  	thetaZX_Histo->Scale(1.0/thetaZX_Histo->Integral());
+  	thetaZX_Histo->GetXaxis()->SetTitle("sin(#theta_{zx})");
+  	thetaZX_Histo->GetYaxis()->SetTitle("Counts");
+  	thetaZX_Histo->GetYaxis()->SetRangeUser(0,0.1);
+  	thetaZX_Histo->Draw("HIST");
+  	thetaZX_HistoWeighted->SetLineColor(kMagenta);
+  	thetaZX_HistoWeighted->SetFillColor(kMagenta);
+  	thetaZX_HistoWeighted->SetFillStyle(3003);
+  	thetaZX_HistoWeighted->Scale(1.0/thetaZX_HistoWeighted->Integral());
+  	thetaZX_HistoWeighted->Draw("HIST SAME");
+  	TLegend* leg_zx = new TLegend(0.6197638,0.7532354,0.9818405,0.9648948,NULL,"brNDC");
+  	leg_zx->AddEntry(thetaZX_Histo, "Not weighted");
+  	leg_zx->AddEntry(thetaZX_HistoWeighted, "Weighted");
+  	leg_zx->Draw();
+  	c10->cd(4);
+  	c10->cd(4)->SetLeftMargin(0.1111111);
+  	thetaZY_Histo->SetStats(0);
+  	thetaZY_Histo->SetLineColor(kBlack);
+  	thetaZY_Histo->Scale(1.0/thetaZY_Histo->Integral());
+  	thetaZY_Histo->GetXaxis()->SetTitle("sin(#theta_{zy})");
+  	thetaZY_Histo->GetYaxis()->SetTitle("Counts");
+  	thetaZY_Histo->GetYaxis()->SetRangeUser(0,0.1);
+  	thetaZY_Histo->Draw("HIST");
+  	thetaZY_HistoWeighted->SetLineColor(kMagenta);
+  	thetaZY_HistoWeighted->SetFillColor(kMagenta);
+  	thetaZY_HistoWeighted->SetFillStyle(3003);
+  	thetaZY_HistoWeighted->Scale(1.0/thetaZY_HistoWeighted->Integral());
+  	thetaZY_HistoWeighted->Draw("HIST SAME");
+	TLegend* leg_zy = new TLegend(0.6197638,0.7532354,0.9818405,0.9648948,NULL,"brNDC");
+  	leg_zy->AddEntry(thetaZY_Histo, "Not weighted");
+  	leg_zy->AddEntry(thetaZY_HistoWeighted, "Weighted");
+  	leg_zy->Draw();
+	
 }
 
 //\\//\\//\\//\\// SHOWPMTSIGNAL //\\//\\//\\//\\//\\//\\//
@@ -811,16 +973,22 @@ void ShowPmtSignal(Int_t SiRunNumber, Int_t evNumber) {
 	TTree* intree = (TTree*)infile->Get("Cherenkov");
 	
 	Double_t PmtPulseHeight[nChannelsPmt];    intree->SetBranchAddress("PmtPulseHeight",PmtPulseHeight);  
-	Int_t DgtzID[nChannelsPmt];		intree->SetBranchAddress("DgtzID",DgtzID);
+	Int_t DgtzID[nChannelsPmt];		  intree->SetBranchAddress("DgtzID",DgtzID);
 	
 	TH2F* h_PmtPulseHeight = new TH2F("h_PmtPulseHeight", Form("Pmt Signal, event %i of run %i",evNumber,SiRunNumber),8,0,8,8,0,8);
+	TH2F* h_PmtPulseHeight_thr = new TH2F("h_PmtPulseHeight_thr", Form("Pmt Signal, event %i of run %i",evNumber,SiRunNumber),8,0,8,8,0,8);
+	h_PmtPulseHeight->SetContour(60);
+	h_PmtPulseHeight_thr->SetContour(60);
 	
 	Double_t IntegratedSignal=0;
 	intree->GetEntry(evNumber-1);
 	for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
 	   if(DgtzID[iChannel]==31) PmtPulseHeight[iChannel]/=4;
 	   h_PmtPulseHeight->SetBinContent(xBin[iChannel],yBin[iChannel], PmtPulseHeight[iChannel]);
-	   IntegratedSignal+=PmtPulseHeight[iChannel];		    	
+	   IntegratedSignal+=PmtPulseHeight[iChannel];
+	   if(PmtPulseHeight[iChannel]>=PmtPulseHeight_thr[iChannel]) {
+	   	h_PmtPulseHeight_thr->SetBinContent(xBin[iChannel],yBin[iChannel], PmtPulseHeight[iChannel]);
+	   }	    	
 	}
 	
 	cout << "IntegratedSignal = " << IntegratedSignal << endl;
@@ -840,6 +1008,17 @@ void ShowPmtSignal(Int_t SiRunNumber, Int_t evNumber) {
 		xLine[i]->Draw("SAME");
 		yLine[i]->Draw("SAME");
 	}
+	
+	TCanvas* cc = new TCanvas("cc","",750,750);
+	cc->SetRightMargin(0.131406);
+	h_PmtPulseHeight_thr->SetStats(0);
+	h_PmtPulseHeight_thr->Draw("colz");
+	for(Int_t i=0; i<7; ++i) {
+		xLine[i]->Draw("SAME");
+		yLine[i]->Draw("SAME");
+	}
+	
+	
 }
 
 
@@ -1066,4 +1245,70 @@ void CumPmtSignal(Int_t SiRunNumber, Int_t mod, Int_t ev) {
 
   return;
 
+}
+
+void DrawLegend() {
+   TCanvas *c_leg = new TCanvas("c_leg", "",289,50,637,362);
+   c_leg->Range(0,0,1,1);
+   c_leg->SetFillColor(0);
+   c_leg->SetBorderMode(0);
+   c_leg->SetBorderSize(2);
+   c_leg->SetFrameBorderMode(0);
+   
+   TLegend *leg = new TLegend(0,0,0.9977679,0.9013062,NULL,"brNDC");
+   leg->SetBorderSize(1);
+   leg->SetTextSize(0.07179487);
+   leg->SetLineColor(1);
+   leg->SetLineStyle(1);
+   leg->SetLineWidth(1);
+   leg->SetFillColor(0);
+   leg->SetFillStyle(1001);
+   TLegendEntry *entry=leg->AddEntry("","All in time events","lpf");
+   entry->SetFillStyle(1001);
+   entry->SetLineColor(1);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(3);
+   entry->SetMarkerColor(1);
+   entry->SetMarkerStyle(1);
+   entry->SetMarkerSize(1);
+   entry->SetTextFont(42);
+   entry=leg->AddEntry("","(x^{}_{rad}-x^{0}_{rad})^{2}+(y^{}_{rad}-y^{0}_{rad})^{2}<1","lpf");
+   entry->SetFillStyle(1001);
+
+   Int_t ci;      // for color index setting
+   TColor *color; // for color definition with alpha
+   ci = TColor::GetColor("#0000ff");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(3);
+   entry->SetMarkerColor(1);
+   entry->SetMarkerStyle(1);
+   entry->SetMarkerSize(1);
+   entry->SetTextFont(42);
+   entry=leg->AddEntry("","cos(#theta)>0.999","lpf");
+   entry->SetFillStyle(1001);
+
+   ci = TColor::GetColor("#00ff00");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(3);
+   entry->SetMarkerColor(1);
+   entry->SetMarkerStyle(1);
+   entry->SetMarkerSize(1);
+   entry->SetTextFont(42);
+   entry=leg->AddEntry("","(x^{}_{rad}-x^{0}_{rad})^{2}+(y^{}_{rad}-y^{0}_{rad})^{2}<1, cos(#theta)>0.999","lpf");
+   entry->SetFillStyle(1001);
+
+   ci = TColor::GetColor("#ff0000");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(3);
+   entry->SetMarkerColor(1);
+   entry->SetMarkerStyle(1);
+   entry->SetMarkerSize(1);
+   entry->SetTextFont(42);
+   leg->Draw();
+   c_leg->Modified();
+   c_leg->cd();
+   c_leg->SetSelected(c_leg);
 }
