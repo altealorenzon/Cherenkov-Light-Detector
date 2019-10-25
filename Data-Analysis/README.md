@@ -19,3 +19,8 @@ Allows to show the Run statisicts of the recorded PMT channels, and to select ev
 Shows plots of the hits in silicon detectors and their projections on the radiator's plane.
 ### ShowPmtSignal()
 Shows the PMT signals of a particular events in a 2d histograms
+### PrintEventOnFile()
+Print in three .txt files the information necessary to run the jupyter-notebook Plot3DEvent.ipynb
+
+## Plot3DEvent.ipynb
+This jupyter-notebok provide the event display of the full event reconstruction in 3-dimensional space. Silicon hits, track path, and PMT signals are shown. 

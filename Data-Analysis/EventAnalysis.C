@@ -62,10 +62,10 @@ const Int_t nChannelsPmt = 26; // or 26
 const Int_t activeChannels[26] = {21,22,29,30,37,38,45,46,5,6,13,14,53,54,61,62,40,39,32,31,24,23,16,15,7,8};
 //(x,y) bin numbers corresponding to the active channels of the Pmt
 //			21 22 29 30 37 38 45 46  5  6 13 14 53 54 61 62 40 39 32 31 24 23 16 15  7  8
-const Int_t xBin[26] = { 3, 3, 4, 4, 5, 5, 6, 6, 1, 1, 2, 2, 7, 7, 8, 8, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1};
-const Int_t yBin[26] = { 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 8, 7, 8, 7, 8, 7, 8, 7, 7, 8};
+const Int_t xBin[26] = { 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 1, 2, 1, 2, 1, 2, 1, 2, 2, 1};
+const Int_t yBin[26] = { 3, 3, 4, 4, 5, 5, 6, 6, 1, 1, 2, 2, 7, 7, 8, 8, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1};
 
-const Double_t PmtPulseHeight_thr[26] = {30,30,30,30,30,30,40,50,100,100,120,70,80,70,70,40,60,40,70,70,70,70,70,20,30};
+const Double_t PmtPulseHeight_thr[26]={30,30,30,30,30,30,40,50,100,100,120,70,80,70,70,40,60,40,70,70,70,70,70,20,30};
 //////run300128
 const Double_t xcenterRadiator = 4.96292;
 const Double_t ycenterRadiator = 3.97302;
@@ -148,6 +148,7 @@ void RunStatsPmt(Int_t SiRunNumber) {
 	
 	Int_t timeWindow_lowerBound;
 	Int_t timeWindow_upperBound;
+	Int_t evCounter=0;
 	
 	for(Int_t iEntry=0; iEntry<nEntries; ++iEntry) {
 		intree->GetEntry(iEntry);
@@ -164,19 +165,19 @@ void RunStatsPmt(Int_t SiRunNumber) {
 		    timeWindow_upperBound=230;
 			}
 		  if(Ev.PmtSignal.Time[iChannel]>=timeWindow_lowerBound && Ev.PmtSignal.Time[iChannel]<=timeWindow_upperBound) {
+		    ++chCounter;
 		    if(Ev.PmtSignal.DgtzID[iChannel]==31) {
 		      PmtPulseHeight_HistoInTime[iChannel]->Fill(Ev.PmtSignal.PulseHeight[iChannel]/4);
-		      //if(Ev.PmtSignal.PulseHeight[iChannel]>=150) ++chCounter;
 		    }
 		    else {
 		      PmtPulseHeight_HistoInTime[iChannel]->Fill(Ev.PmtSignal.PulseHeight[iChannel]);
 		    }
 		  }
 		}
-		//if(nChannelsPmt==8&&chCounter>=4) cout << "High PH in " << chCounter << " channels. Event number = " << evNumber << endl;
-		//if(nChannelsPmt==26&&chCounter>=17) cout << "High PH in " << chCounter << " channels. Event number = " << evNumber << endl;
+		if(chCounter==nChannelsPmt) ++evCounter;
 	}
 	
+	cout << "Events all in time window = " << evCounter << endl;
 	//gStyle->SetTitleFontSize(0.76);
 	
 	TLine* line_lowerBound[nChannelsPmt]; 
@@ -338,18 +339,18 @@ void xyrad_histo(Int_t SiRunNumber,
   	TH1F* trgDown_HistoInAngularRange  = new TH1F("trgDown_HistoInAngularRange","",50,0,700);
   	TH1F* trgDown_HistoInRange  = new TH1F("trgDown_HistoInRange","",50,0,700);
   	TH1F* trgDown_HistoOut = new TH1F("trgDown_HistoOut","",50,0,700);
-  	TH1F* Dinode_Histo  = new TH1F("Dinode_Histo","Dinode",50,0,700);
+  	TH1F* Dinode_Histo  = new TH1F("Dinode_Histo","Dynode",50,0,700);
   	TH1F* Dinode_HistoInSpacialRange  = new TH1F("Dinode_HistoInSpacialRange","",50,0,700);
   	TH1F* Dinode_HistoInAngularRange  = new TH1F("Dinode_HistoInAngularRange","",50,0,700);
   	TH1F* Dinode_HistoInRange  = new TH1F("Dinode_HistoInRange","",50,0,700);
-  	TH1F* Dinode_HistoLower = new TH1F("Dinode_HistoLower","Dinode Bkg Signal",30,0,200);
-  	TH1F* Dinode_HistoUpper = new TH1F("Dinode_HistoUpper","Dinode Bkg Signal",30,0,200);
+  	TH1F* Dinode_HistoLower = new TH1F("Dinode_HistoLower","Dynode Bkg Signal",30,0,200);
+  	TH1F* Dinode_HistoUpper = new TH1F("Dinode_HistoUpper","Dynode Bkg Signal",30,0,200);
   	TH1F* trgSignal_Histo  = new TH1F("trgSignal_Histo","Trigger Signal",50,0,700);
   	TH1F* trgSignal_HistoInSpacialRange  = new TH1F("trgSignal_HistoInSpacialRange","",50,0,700);
   	TH1F* trgSignal_HistoInAngularRange  = new TH1F("trgSignal_HistoInAngularRange","",50,0,700);
   	TH1F* trgSignal_HistoInRange  = new TH1F("trgSignal_HistoInRange","",50,0,700);
   	// Pmt pulse height
-  	TH1F* PmtIntegratedPulseHeight_HistoInRange = new TH1F("PmtIntegratedPulseHeight_HistoinRange","Bkg Dinode PH and Signal Pmt PH",70,500,15000);
+  	TH1F* PmtIntegratedPulseHeight_HistoInRange = new TH1F("PmtIntegratedPulseHeight_HistoinRange","Integrated Bkg and Signal Pmt PH",70,500,15000);
   	TH1F* PmtIntegratedPulseHeight_HistoLower = new TH1F("PmtIntegratedPulseHeight_HistoLower","",70,500,15000);
   	TH1F* PmtIntegratedPulseHeight_HistoUpper = new TH1F("PmtIntegratedPulseHeight_HistoUpper","",70,500,15000);
   	TH1F* PmtPulseHeight_HistoInRange[nChannelsPmt];
@@ -493,7 +494,7 @@ void xyrad_histo(Int_t SiRunNumber,
 			}
 			// Trying to find some kind of background on the Pmt channels
     			if ( (pow((xcenterRadiator - xRadiator),2)+pow((ycenterRadiator - yRadiator),2)) >= pow((thr_Radiator+1),2)) {
-    				if( yRadiator < ycenterRadiator && yHit[0] < 1.0 ) {
+    				if( xRadiator < xcenterRadiator && xHit[0] < 1.0 ) {
     					xyRadiator_HistoBkg->Fill(xRadiator,yRadiator);
     					xy0_HistoBkg->Fill(xHit[0],yHit[0]);
     					xy1_HistoBkg->Fill(xHit[1],yHit[1]);
@@ -502,7 +503,7 @@ void xyrad_histo(Int_t SiRunNumber,
 			    		for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
 			    			PmtPulseHeight_HistoLower[iChannel]->Fill(PulseHeight[iChannel]);
 			    		}
-    				} else if(yRadiator > ycenterRadiator && yHit[0] > 8.0 ) {
+    				} else if(xRadiator > xcenterRadiator && xHit[0] > 8.0 ) {
     					xyRadiator_HistoBkg->Fill(xRadiator,yRadiator);
     					xy0_HistoBkg->Fill(xHit[0],yHit[0]);
     					xy1_HistoBkg->Fill(xHit[1],yHit[1]);
@@ -722,8 +723,8 @@ void xyrad_histo(Int_t SiRunNumber,
   	trgSignal_HistoInRange->SetLineColor(kRed);
   	trgSignal_HistoInRange->Draw("same");
 
-	TCanvas* c5 = new TCanvas("c5","",375,750);
-	c5->Divide(1,2);
+	TCanvas* c5 = new TCanvas("c5","",750,375);
+	c5->Divide(2,1);
 	c5->cd(1);
 	Dinode_HistoLower->Scale(1.0/Dinode_HistoLower->Integral());
 	Dinode_HistoLower->GetYaxis()->SetRangeUser(0.,0.2);
@@ -739,8 +740,8 @@ void xyrad_histo(Int_t SiRunNumber,
 	Dinode_HistoUpper->SetFillStyle(3005);
   	Dinode_HistoUpper->Draw("SAME HIST");
   	TLegend* leg_bkg = new TLegend(0.5177819,0.6243953,0.8980413,0.8995525,NULL,"brNDC");
-  	leg_bkg->AddEntry(Dinode_HistoLower, "Lower Bkg");
-  	leg_bkg->AddEntry(Dinode_HistoUpper, "Upper Bkg");
+  	leg_bkg->AddEntry(Dinode_HistoLower, "Left BKG");
+  	leg_bkg->AddEntry(Dinode_HistoUpper, "Right BKG");
   	leg_bkg->Draw();
   	c5->cd(2);
 	PmtIntegratedPulseHeight_HistoInRange->Scale(1.0/PmtIntegratedPulseHeight_HistoInRange->Integral());
@@ -763,14 +764,14 @@ void xyrad_histo(Int_t SiRunNumber,
   	PmtIntegratedPulseHeight_HistoUpper->SetFillStyle(3005);
   	PmtIntegratedPulseHeight_HistoUpper->Draw("SAME HIST");
   	TLegend* leg_bkg_sig = new TLegend(0.3372271,0.5990264,0.8980413,0.8983732,NULL,"brNDC");
-  	leg_bkg_sig->AddEntry(Dinode_HistoLower, "Lower Bkg");
-  	leg_bkg_sig->AddEntry(Dinode_HistoUpper, "Upper Bkg");
+  	leg_bkg_sig->AddEntry(Dinode_HistoLower, "Left BKG");
+  	leg_bkg_sig->AddEntry(Dinode_HistoUpper, "Right BKG");
   	leg_bkg_sig->AddEntry(PmtIntegratedPulseHeight_HistoInRange, "Selected events");
   	leg_bkg_sig->Draw();
   	
   	
-  	TCanvas* c6 = new TCanvas("c6","",750,750);
-  	c6->Divide(2,2);
+  	TCanvas* c6 = new TCanvas("c6","",750,375);
+  	c6->Divide(2,1);
 	c6->cd(1);
 	xy0_HistoBkg->SetStats(0);
 	xy0_HistoBkg->GetXaxis()->SetTitle("x UPPER Si [cm]");
@@ -783,7 +784,7 @@ void xyrad_histo(Int_t SiRunNumber,
 	ptUpper->SetTextFont(42);
 	ptUpper->SetTextSize(0.06);
 	ptUpper->SetTextColor(kBlue-8);
-	ptUpper->AddText("Upper Bkg");
+	ptUpper->AddText("Right BKG");
 	ptUpper->Draw();
 	TPaveText* ptLower = new TPaveText(0.1322972,0.2202511,0.3968917,0.2839338,"blNDC");
 	ptLower->SetBorderSize(1);
@@ -792,27 +793,27 @@ void xyrad_histo(Int_t SiRunNumber,
 	ptLower->SetTextFont(42);
 	ptLower->SetTextSize(0.06);
 	ptLower->SetTextColor(kBlue+3);
-	ptLower->AddText("Lower Bkg");
+	ptLower->AddText("Left BKG");
 	ptLower->Draw();
 	c6->cd(2);
-	xy1_HistoBkg->SetStats(0);
+	/*xy1_HistoBkg->SetStats(0);
 	xy1_HistoBkg->GetXaxis()->SetTitle("x UPPER Si [cm]");
 	xy1_HistoBkg->GetYaxis()->SetTitle("y UPPER Si [cm]");
 	xy1_HistoBkg->Draw("colz");
-	c6->cd(3);
+	c6->cd(3);*/
 	xyRadiator_HistoBkg->SetStats(0);
 	xyRadiator_HistoBkg->GetXaxis()->SetTitle("x_{rad} [cm]");
 	xyRadiator_HistoBkg->GetYaxis()->SetTitle("y_{rad} [cm]");
 	xyRadiator_HistoBkg->Draw("colz");
-	TLine* line1=new TLine(xcenterRadiator-3,  ycenterRadiator,xcenterRadiator+3,  ycenterRadiator);
+	TLine* line1=new TLine(xcenterRadiator-2.5,  ycenterRadiator-2.5,xcenterRadiator,  ycenterRadiator-2.5);
 	line1->SetLineColor(kRed-10); line1->SetLineWidth(2); line1->Draw("SAME");
-	TLine* line2=new TLine(xcenterRadiator-3,ycenterRadiator+3,xcenterRadiator+3,ycenterRadiator+3); 
+	TLine* line2=new TLine(xcenterRadiator-2.5,ycenterRadiator+2.5,xcenterRadiator,ycenterRadiator+2.5); 
 	line2->SetLineColor(kRed-10); line2->SetLineWidth(2); line2->Draw("SAME");
-	TLine* line3=new TLine(xcenterRadiator-3,  ycenterRadiator,xcenterRadiator-3,ycenterRadiator+3);
+	TLine* line3=new TLine(xcenterRadiator-2.5,  ycenterRadiator-2.5,xcenterRadiator-2.5,ycenterRadiator+2.5);
 	line3->SetLineColor(kRed-10); line3->SetLineWidth(2); line3->Draw("SAME");
-	TLine* line4=new TLine(xcenterRadiator+3,  ycenterRadiator,xcenterRadiator+3,ycenterRadiator+3);
+	TLine* line4=new TLine(xcenterRadiator,  ycenterRadiator-2.5,xcenterRadiator,ycenterRadiator+2.5);
 	line4->SetLineColor(kRed-10); line4->SetLineWidth(2); line4->Draw("SAME");
-	TLine* line5=new TLine(0,  ycenterRadiator,10,ycenterRadiator);
+	TLine* line5=new TLine(xcenterRadiator,  0,xcenterRadiator,10);
 	line5->SetLineColor(kBlack); line5->SetLineWidth(2); line5->SetLineStyle(5); line5->Draw("SAME");
 	TPaveText* ptPmt = new TPaveText(0.2169559,0.6924242,0.4227859,0.7560606,"blNDC");
 	ptPmt->SetBorderSize(1);
@@ -830,7 +831,7 @@ void xyrad_histo(Int_t SiRunNumber,
 	ptUpperRadiator->SetTextFont(42);
 	ptUpperRadiator->SetTextSize(0.06);
 	ptUpperRadiator->SetTextColor(kBlue-8);
-	ptUpperRadiator->AddText("Upper Bkg");
+	ptUpperRadiator->AddText("Right BKG");
 	ptUpperRadiator->Draw();
   	TPaveText* ptLowerRadiator = new TPaveText(0.1322972,0.1375786,0.3968917,0.2010764,"blNDC");
 	ptLowerRadiator->SetBorderSize(1);
@@ -839,13 +840,13 @@ void xyrad_histo(Int_t SiRunNumber,
 	ptLowerRadiator->SetTextFont(42);
 	ptLowerRadiator->SetTextSize(0.06);
 	ptLowerRadiator->SetTextColor(kBlue+3);
-	ptLowerRadiator->AddText("Lower Bkg");
+	ptLowerRadiator->AddText("Left BKG");
 	ptLowerRadiator->Draw();
-  	c6->cd(4);
+  	/*c6->cd(4);
   	PmtIntegratedPulseHeight_HistoInRange->Draw("HIST");
   	PmtIntegratedPulseHeight_HistoLower->Draw("SAME HIST");
   	PmtIntegratedPulseHeight_HistoUpper->Draw("SAME HIST");
-  	leg_bkg_sig->Draw();
+  	leg_bkg_sig->Draw();*/
   	
   	TCanvas* c7 = new TCanvas("c7","",750,375);
   	c7->Divide(2,1);
@@ -889,8 +890,8 @@ void xyrad_histo(Int_t SiRunNumber,
 	}
 	c8->cd(27);
 	TLegend* leg_ph = new TLegend(0.0,0.0,0.95,0.8,NULL,"brNDC");
-	leg_ph->AddEntry(PmtPulseHeight_HistoLower[0],"Lower Bkg");
-	leg_ph->AddEntry(PmtPulseHeight_HistoUpper[0],"Upper Bkg");
+	leg_ph->AddEntry(PmtPulseHeight_HistoLower[0],"Left BKG");
+	leg_ph->AddEntry(PmtPulseHeight_HistoUpper[0],"Right BKG");
 	leg_ph->AddEntry(PmtPulseHeight_HistoInRange[0], "Selected Events");
 	leg_ph->Draw();
 	
@@ -987,6 +988,7 @@ void ShowPmtSignal(Int_t SiRunNumber, Int_t evNumber) {
 	   h_PmtPulseHeight->SetBinContent(xBin[iChannel],yBin[iChannel], PmtPulseHeight[iChannel]);
 	   IntegratedSignal+=PmtPulseHeight[iChannel];
 	   if(PmtPulseHeight[iChannel]>=PmtPulseHeight_thr[iChannel]) {
+		cout << "Ch Number " << activeChannels[iChannel] << endl;
 	   	h_PmtPulseHeight_thr->SetBinContent(xBin[iChannel],yBin[iChannel], PmtPulseHeight[iChannel]);
 	   }	    	
 	}
@@ -1037,19 +1039,22 @@ void PrintEventOnFile(Int_t SiRunNumber, Int_t EvNumber) {
   Double_t xRadiator      ;                 intree->SetBranchAddress("xRadiator", &xRadiator);
   Double_t yRadiator      ;                 intree->SetBranchAddress("yRadiator", &yRadiator);
   Double_t zRadiator      ;                 intree->SetBranchAddress("zRadiator", &zRadiator);
-
+  Int_t DgtzID[nChannelsPmt];		    intree->SetBranchAddress("DgtzID",DgtzID);
   Double_t x0_on_y0, x1_on_y1;
   
   //Print the event information on file
-  ofstream outchannels, outhit;
+  ofstream outchannels, outhit, outPH;
   outchannels.open("hitchannels.txt");
   outhit.open("trace.txt");
+  outPH.open("activePH.txt");
 
   intree->GetEntry(EvNumber-1);
   
   for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
-    if (PmtPulseHeight[iChannel] > 0.0) {
+    if(DgtzID[iChannel]==31) PmtPulseHeight[iChannel]/=4;
+    if(PmtPulseHeight[iChannel]>=PmtPulseHeight_thr[iChannel]) {
       outchannels << activeChannels[iChannel] << " ";
+      outPH << PmtPulseHeight[iChannel] << " ";
     }
   }
 
@@ -1059,19 +1064,20 @@ void PrintEventOnFile(Int_t SiRunNumber, Int_t EvNumber) {
   outhit << x0_on_y0   << " " << yHit[0]   << " " << -zHit[0]   << endl;
   outhit << x1_on_y1   << " " << yHit[1]   << " " << -zHit[1]   << endl;
   
-  for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
+/*  for(Int_t iChannel=0; iChannel<nChannelsPmt; ++iChannel) {
     if (PmtPulseHeight[iChannel] > 150.0) {
       outchannels << activeChannels[iChannel] << " ";
     }
   }
   
   outhit << xHit[0]   << " " << yHit[0]   << " " << -zHit[0]   << endl;
-  outhit << xHit[1]   << " " << yHit[1]   << " " << -zHit[1]   << endl;
+  outhit << xHit[1]   << " " << yHit[1]   << " " << -zHit[1]   << endl;*/
   outhit << xRadiator << " " << yRadiator << " " << -zRadiator << endl;
   
   outchannels.close();
   outhit.close();
-
+  outPH.close();
+  
   return;
 
 }
